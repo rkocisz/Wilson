@@ -1,0 +1,10 @@
+^C:\PROJECTS\CPP\WILSON\BUILD\CMAKEFILES\47100370C1AEA8A9E9D1C8DB6D706BB8\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Projects/cpp/wilson -BC:/Projects/cpp/wilson/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Projects/cpp/wilson/build/WILSON.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
