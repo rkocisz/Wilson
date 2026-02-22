@@ -1,6 +1,6 @@
-^C:\PROJECTS\CPP\WILSON\CMAKELISTS.TXT
+^C:\PROJECTS\CPP\VISUALSTUDIO\WILSON\CMAKELISTS.TXT
 setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Projects/cpp/wilson -BC:/Projects/cpp/wilson/build --check-stamp-file C:/Projects/cpp/wilson/build/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Projects/cpp/visualStudio/Wilson -BC:/Projects/cpp/visualStudio/Wilson/build --check-stamp-file C:/Projects/cpp/visualStudio/Wilson/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

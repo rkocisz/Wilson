@@ -1,6 +1,6 @@
-^C:\PROJECTS\CPP\WILSON\BUILD\CMAKEFILES\47100370C1AEA8A9E9D1C8DB6D706BB8\GENERATE.STAMP.RULE
+^C:\PROJECTS\CPP\VISUALSTUDIO\WILSON\BUILD\CMAKEFILES\B71E1A263B0546E3CC1E067B5E6FA076\GENERATE.STAMP.RULE
 setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Projects/cpp/wilson -BC:/Projects/cpp/wilson/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Projects/cpp/wilson/build/WILSON.sln
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Projects/cpp/visualStudio/Wilson -BC:/Projects/cpp/visualStudio/Wilson/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Projects/cpp/visualStudio/Wilson/build/WILSON.sln
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
