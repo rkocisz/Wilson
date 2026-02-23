@@ -1,4 +1,4 @@
--aktualizacje stanu en passant i strony która robi ruch w make i unmake move
+-repetition detection
 -pseudo-legal move generator
 -isSquareAttacked
 -legal move generator

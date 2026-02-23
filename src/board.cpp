@@ -2,6 +2,7 @@
 #include <iostream>
 #include <bitset>
 #include "common.h"
+#include "util.h"
 
 Board::Board()
 : castlingRights_(15)
@@ -16,10 +17,14 @@ Board::Board()
 		bitBoards_[i] = 0ULL;
 
 	loadStartPos();
+
+	initZobrist();
+	zobristKey_ = computeZobrist();
 }
 
 void Board::makeMove(Move move)
 {
+	zobristKey_ ^= zobristSide_;
 	sideToMove_ = opposite(sideToMove_);
 
 	//normal moving
@@ -32,11 +37,16 @@ void Board::makeMove(Move move)
 	bitBoards_[move.moved] &= ~startMask;
 	bitBoards_[move.moved] |= endMask;
 
+	zobristKey_ ^= zobristPiece_[move.moved][move.startPos];
+	zobristKey_ ^= zobristPiece_[move.moved][move.endPos];
+
 	//capturing
 	if (move.captured != PieceType::empty)
 	{
 		uint64_t captureMask = squareMask(move.endPos);
 		bitBoards_[move.captured] &= ~captureMask;
+
+		zobristKey_ ^= zobristPiece_[move.captured][move.endPos];
 	}
 
 	//promotion
@@ -45,6 +55,9 @@ void Board::makeMove(Move move)
 		board_[move.endPos] = move.promotion;
 		uint64_t promotionMask = squareMask(move.endPos);
 		bitBoards_[move.promotion] |= promotionMask;
+
+		zobristKey_ ^= zobristPiece_[move.moved][move.endPos];
+		zobristKey_ ^= zobristPiece_[move.promotion][move.endPos];
 	}
 
 	//castling rights
@@ -97,6 +110,9 @@ void Board::makeMove(Move move)
 			castlingRights_ &= ~blackQueenSide;
 	}
 
+	zobristKey_ ^= zobristCastling_[move.prevCastlingRights];
+	zobristKey_ ^= zobristCastling_[castlingRights_];
+
 	//enPassantRights
 	if (move.moved == PieceType::whitePawn &&
 		move.endPos == move.startPos - 16)
@@ -112,6 +128,16 @@ void Board::makeMove(Move move)
 	{
 		enPassantSquare_ = -1;
 	}
+
+	if(move.prevEnPassantSquare != -1)
+	{
+		zobristKey_ ^= zobristEnPassant_[move.prevEnPassantSquare % 8];
+	}
+	if (enPassantSquare_ != -1)
+	{
+		zobristKey_ ^= zobristEnPassant_[enPassantSquare_ % 8];
+	}
+	
 
 	//50 move rule
 	if (move.moved == PieceType::whitePawn || move.moved == PieceType::blackPawn || move.captured != empty)
@@ -137,6 +163,9 @@ void Board::makeMove(Move move)
 				
 				bitBoards_[PieceType::whiteRook] &= ~startMask;
 				bitBoards_[PieceType::whiteRook] |= endMask;
+
+				zobristKey_ ^= zobristPiece_[PieceType::whiteRook][63];
+				zobristKey_ ^= zobristPiece_[PieceType::whiteRook][61];
 			}
 			else
 			{
@@ -148,6 +177,9 @@ void Board::makeMove(Move move)
 
 				bitBoards_[PieceType::blackRook] &= ~startMask;
 				bitBoards_[PieceType::blackRook] |= endMask;
+
+				zobristKey_ ^= zobristPiece_[PieceType::blackRook][7];
+				zobristKey_ ^= zobristPiece_[PieceType::blackRook][5];
 			}
 			break;
 
@@ -162,6 +194,9 @@ void Board::makeMove(Move move)
 
 				bitBoards_[PieceType::whiteRook] &= ~startMask;
 				bitBoards_[PieceType::whiteRook] |= endMask;
+
+				zobristKey_ ^= zobristPiece_[PieceType::whiteRook][56];
+				zobristKey_ ^= zobristPiece_[PieceType::whiteRook][59];
 			}
 			else
 			{
@@ -173,6 +208,9 @@ void Board::makeMove(Move move)
 
 				bitBoards_[PieceType::blackRook] &= ~startMask;
 				bitBoards_[PieceType::blackRook] |= endMask;
+
+				zobristKey_ ^= zobristPiece_[PieceType::blackRook][0];
+				zobristKey_ ^= zobristPiece_[PieceType::blackRook][3];
 			}
 			break;
 
@@ -182,12 +220,16 @@ void Board::makeMove(Move move)
 				board_[move.endPos + 8] = PieceType::empty;
 				endMask = squareMask(move.endPos + 8);
 				bitBoards_[PieceType::blackPawn] &= ~endMask;
+
+				zobristKey_ ^= zobristPiece_[PieceType::blackPawn][move.endPos + 8];
 			}
 			else
 			{
 				board_[move.endPos - 8] = PieceType::empty;
 				endMask = squareMask(move.endPos - 8);
 				bitBoards_[PieceType::whitePawn] &= ~endMask;
+
+				zobristKey_ ^= zobristPiece_[PieceType::whitePawn][move.endPos - 8];
 			}
 			break;
 
@@ -365,4 +407,54 @@ inline uint64_t Board::squareMask(int square)
 inline Color Board::opposite(Color c)
 {
 	return (c == white) ? black : white;
+}
+
+void Board::initZobrist()
+{
+	for (int piece = 0; piece < 12; piece++)
+	{
+		for (int sq = 0; sq < 64; sq++)
+		{
+			zobristPiece_[piece][sq] = Util::randomU64();
+		}
+	}
+	zobristSide_ = Util::randomU64();
+
+	for (int i = 0; i < 16; i++)
+	{
+		zobristCastling_[i] = Util::randomU64();
+	}
+
+	for (int i = 0; i < 8; i++)
+	{
+		zobristEnPassant_[i] = Util::randomU64();
+	}
+}
+
+uint64_t Board::computeZobrist()
+{
+	uint64_t key = 0;
+
+	for (int sq = 0; sq < 64; sq++)
+	{
+		PieceType piece = board_[sq];
+
+		if (piece != PieceType::empty)
+		{
+			key ^= zobristPiece_[piece][sq];
+		}
+	}
+
+	if (sideToMove_ == black)
+		key ^= zobristSide_;
+
+	key ^= zobristCastling_[castlingRights_];
+
+	if (enPassantSquare_ != -1)
+	{
+		int file = enPassantSquare_ % 8;
+		key ^= zobristEnPassant_[file];
+	}
+
+	return key;
 }
