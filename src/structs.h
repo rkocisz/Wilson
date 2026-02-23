@@ -15,6 +15,7 @@ struct Move
 	uint8_t prevCastlingRights;
 	int prevEnPassantSquare;
 	int prevHalfmoveClock;
+	uint64_t prevZobristKey;
 };
 
 #endif 

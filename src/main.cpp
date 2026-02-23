@@ -5,7 +5,8 @@ int main()
 {
     SetConsoleOutputCP(CP_UTF8);
 
-   testMoveAndUnmakeMove();
+    testMoveAndUnmakeMove();
+    testZobristKeyGeneration();
 
     return 0;
 }

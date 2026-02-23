@@ -240,6 +240,8 @@ void Board::makeMove(Move move)
 
 void Board::unmakeMove(Move move)
 {
+	zobristKey_ = move.prevZobristKey;
+
 	sideToMove_ = opposite(sideToMove_);
 	castlingRights_ = move.prevCastlingRights;
 	enPassantSquare_ = move.prevEnPassantSquare;
@@ -398,6 +400,15 @@ void Board::draw()
 
 }
 
+uint64_t Board::getZobristKey()
+{
+	return zobristKey_;
+}
+
+uint64_t Board::getNewlyGeneratedZobristKey()
+{
+	return computeZobrist();
+}
 
 inline uint64_t Board::squareMask(int square)
 {

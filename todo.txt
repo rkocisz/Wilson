@@ -1,3 +1,4 @@
+-bitboard for white, black, all pieces
 -repetition detection
 -pseudo-legal move generator
 -isSquareAttacked

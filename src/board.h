@@ -19,6 +19,8 @@ public:
 	void makeMove(Move move);
 	void unmakeMove(Move move);
 	void loadStartPos();
+	uint64_t getZobristKey();
+	uint64_t getNewlyGeneratedZobristKey();
 
 private:
 
