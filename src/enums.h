@@ -28,10 +28,16 @@ enum MoveType
 
 enum CastlingRights 
 {
-	WhiteKingSide = 1,
-	WhiteQueenSide = 2,
-	BlackKingSide = 4,
-	BlackQueenSide = 8
+	whiteKingSide = 1,
+	whiteQueenSide = 2,
+	blackKingSide = 4,
+	blackQueenSide = 8
+};
+
+enum Color
+{
+	white,
+	black
 };
 
 

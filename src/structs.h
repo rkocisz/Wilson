@@ -13,6 +13,8 @@ struct Move
 	PieceType promotion;
 	MoveType moveType;
 	uint8_t prevCastlingRights;
+	int prevEnPassantSquare;
+	int prevHalfmoveClock;
 };
 
 #endif 

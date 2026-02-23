@@ -5,6 +5,9 @@
 
 Board::Board()
 : castlingRights_(15)
+, enPassantSquare_(-1)
+, sideToMove_(Color::white)
+, halfmoveClock_(0)
 {
 	for (int i = 0; i < 64; ++i)
 		board_[i] = PieceType::empty;
@@ -17,6 +20,8 @@ Board::Board()
 
 void Board::makeMove(Move move)
 {
+	sideToMove_ = opposite(sideToMove_);
+
 	//normal moving
 	board_[move.startPos] = PieceType::empty;
 	board_[move.endPos] = move.moved;
@@ -46,50 +51,76 @@ void Board::makeMove(Move move)
 	//king moves
 	if (move.moved == PieceType::whiteKing)
 	{
-		castlingRights_ &= ~CastlingRights::WhiteKingSide;
-		castlingRights_ &= ~CastlingRights::WhiteQueenSide;
+		castlingRights_ &= ~CastlingRights::whiteKingSide;
+		castlingRights_ &= ~CastlingRights::whiteQueenSide;
 	}
 	else if (move.moved == PieceType::blackKing)
 	{
-		castlingRights_ &= ~CastlingRights::BlackKingSide;
-		castlingRights_ &= ~CastlingRights::BlackQueenSide;
+		castlingRights_ &= ~CastlingRights::blackKingSide;
+		castlingRights_ &= ~CastlingRights::blackQueenSide;
 	}
 
 	//rook moves
 	if (move.moved == PieceType::whiteRook)
 	{
 		if (move.startPos == 63)
-			castlingRights_ &= ~WhiteKingSide;
+			castlingRights_ &= ~whiteKingSide;
 
 		if (move.startPos == 56)
-			castlingRights_ &= ~WhiteQueenSide;
+			castlingRights_ &= ~whiteQueenSide;
 	}
 	else if (move.moved == PieceType::blackRook)
 	{
 		if (move.startPos == 7)
-			castlingRights_ &= ~BlackKingSide;
+			castlingRights_ &= ~blackKingSide;
 
 		if (move.startPos == 0)
-			castlingRights_ &= ~BlackQueenSide;
+			castlingRights_ &= ~blackQueenSide;
 	}
 
 	//rook captured
 	if (move.captured == PieceType::whiteRook)
 	{
 		if (move.endPos == 63)
-			castlingRights_ &= ~WhiteKingSide;
+			castlingRights_ &= ~whiteKingSide;
 
 		if (move.endPos == 56)
-			castlingRights_ &= ~WhiteQueenSide;
+			castlingRights_ &= ~whiteQueenSide;
 	}
 
 	if (move.captured == PieceType::blackRook)
 	{
 		if (move.endPos == 7)
-			castlingRights_ &= ~BlackKingSide;
+			castlingRights_ &= ~blackKingSide;
 
 		if (move.endPos == 0)
-			castlingRights_ &= ~BlackQueenSide;
+			castlingRights_ &= ~blackQueenSide;
+	}
+
+	//enPassantRights
+	if (move.moved == PieceType::whitePawn &&
+		move.endPos == move.startPos - 16)
+	{
+		enPassantSquare_ = move.startPos - 8;
+	}
+	else if (move.moved == PieceType::blackPawn &&
+		move.endPos == move.startPos + 16)
+	{
+		enPassantSquare_ = move.startPos + 8;
+	}
+	else
+	{
+		enPassantSquare_ = -1;
+	}
+
+	//50 move rule
+	if (move.moved == PieceType::whitePawn || move.moved == PieceType::blackPawn || move.captured != empty)
+	{
+		halfmoveClock_ = 0;
+	}
+	else
+	{
+		halfmoveClock_++;
 	}
 
 	//additional moving to custom moves
@@ -167,7 +198,10 @@ void Board::makeMove(Move move)
 
 void Board::unmakeMove(Move move)
 {
+	sideToMove_ = opposite(sideToMove_);
 	castlingRights_ = move.prevCastlingRights;
+	enPassantSquare_ = move.prevEnPassantSquare;
+	halfmoveClock_ = move.prevHalfmoveClock;
 
 	uint64_t startMask = squareMask(move.startPos);
 	uint64_t endMask = squareMask(move.endPos);
@@ -326,4 +360,9 @@ void Board::draw()
 inline uint64_t Board::squareMask(int square)
 {
 	return 1ULL << (63 - square);
+}
+
+inline Color Board::opposite(Color c)
+{
+	return (c == white) ? black : white;
 }
