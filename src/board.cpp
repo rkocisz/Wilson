@@ -36,6 +36,17 @@ void Board::makeMove(Move move)
 
 	bitBoards_[move.moved] &= ~startMask;
 	bitBoards_[move.moved] |= endMask;
+	
+	if (move.moved < 6)
+	{
+		whitePieces_ &= ~startMask;
+		whitePieces_ |= endMask;
+	}
+	else
+	{
+		blackPieces_ &= ~startMask;
+		blackPieces_ |= endMask;;
+	}
 
 	zobristKey_ ^= zobristPiece_[move.moved][move.startPos];
 	zobristKey_ ^= zobristPiece_[move.moved][move.endPos];
@@ -46,6 +57,11 @@ void Board::makeMove(Move move)
 		uint64_t captureMask = squareMask(move.endPos);
 		bitBoards_[move.captured] &= ~captureMask;
 
+		if (move.captured < 6)
+			whitePieces_ &= ~captureMask;
+		else
+			blackPieces_ &= ~captureMask;
+
 		zobristKey_ ^= zobristPiece_[move.captured][move.endPos];
 	}
 
@@ -54,7 +70,13 @@ void Board::makeMove(Move move)
 	{
 		board_[move.endPos] = move.promotion;
 		uint64_t promotionMask = squareMask(move.endPos);
+		bitBoards_[move.moved] &= ~promotionMask;
 		bitBoards_[move.promotion] |= promotionMask;
+
+		if (move.promotion < 6)
+			whitePieces_ |= promotionMask;
+		else
+			blackPieces_ |= promotionMask;
 
 		zobristKey_ ^= zobristPiece_[move.moved][move.endPos];
 		zobristKey_ ^= zobristPiece_[move.promotion][move.endPos];
@@ -164,6 +186,9 @@ void Board::makeMove(Move move)
 				bitBoards_[PieceType::whiteRook] &= ~startMask;
 				bitBoards_[PieceType::whiteRook] |= endMask;
 
+				whitePieces_ &= ~startMask;
+				whitePieces_ |= endMask;
+
 				zobristKey_ ^= zobristPiece_[PieceType::whiteRook][63];
 				zobristKey_ ^= zobristPiece_[PieceType::whiteRook][61];
 			}
@@ -173,10 +198,13 @@ void Board::makeMove(Move move)
 				board_[5] = PieceType::blackRook;
 
 				startMask = squareMask(7);
-				endMask = squareMask(7);
+				endMask = squareMask(5);
 
 				bitBoards_[PieceType::blackRook] &= ~startMask;
 				bitBoards_[PieceType::blackRook] |= endMask;
+
+				blackPieces_ &= ~startMask;
+				blackPieces_ |= endMask;
 
 				zobristKey_ ^= zobristPiece_[PieceType::blackRook][7];
 				zobristKey_ ^= zobristPiece_[PieceType::blackRook][5];
@@ -195,6 +223,9 @@ void Board::makeMove(Move move)
 				bitBoards_[PieceType::whiteRook] &= ~startMask;
 				bitBoards_[PieceType::whiteRook] |= endMask;
 
+				whitePieces_ &= ~startMask;
+				whitePieces_ |= endMask;
+
 				zobristKey_ ^= zobristPiece_[PieceType::whiteRook][56];
 				zobristKey_ ^= zobristPiece_[PieceType::whiteRook][59];
 			}
@@ -209,6 +240,9 @@ void Board::makeMove(Move move)
 				bitBoards_[PieceType::blackRook] &= ~startMask;
 				bitBoards_[PieceType::blackRook] |= endMask;
 
+				blackPieces_ &= ~startMask;
+				blackPieces_ |= endMask;
+
 				zobristKey_ ^= zobristPiece_[PieceType::blackRook][0];
 				zobristKey_ ^= zobristPiece_[PieceType::blackRook][3];
 			}
@@ -221,6 +255,8 @@ void Board::makeMove(Move move)
 				endMask = squareMask(move.endPos + 8);
 				bitBoards_[PieceType::blackPawn] &= ~endMask;
 
+				blackPieces_ &= ~endMask;
+
 				zobristKey_ ^= zobristPiece_[PieceType::blackPawn][move.endPos + 8];
 			}
 			else
@@ -229,12 +265,16 @@ void Board::makeMove(Move move)
 				endMask = squareMask(move.endPos - 8);
 				bitBoards_[PieceType::whitePawn] &= ~endMask;
 
+				whitePieces_ &= ~endMask;
+
 				zobristKey_ ^= zobristPiece_[PieceType::whitePawn][move.endPos - 8];
 			}
 			break;
 
 		default:
 			break;
+
+		allPieces_ = whitePieces_ | blackPieces_;
 	}
 }
 
@@ -260,6 +300,9 @@ void Board::unmakeMove(Move move)
 
 			bitBoards_[PieceType::whiteRook] &= ~squareMask(61);
 			bitBoards_[PieceType::whiteRook] |= squareMask(63);
+
+			whitePieces_ &= ~squareMask(61);
+			whitePieces_ |= squareMask(63);
 		}
 		else
 		{
@@ -268,6 +311,9 @@ void Board::unmakeMove(Move move)
 
 			bitBoards_[PieceType::blackRook] &= ~squareMask(5);
 			bitBoards_[PieceType::blackRook] |= squareMask(7);
+
+			blackPieces_ &= ~squareMask(5);
+			blackPieces_ |= squareMask(7);
 		}
 		break;
 
@@ -279,6 +325,9 @@ void Board::unmakeMove(Move move)
 
 			bitBoards_[PieceType::whiteRook] &= ~squareMask(59);
 			bitBoards_[PieceType::whiteRook] |= squareMask(56);
+
+			whitePieces_ &= ~squareMask(59);
+			whitePieces_ |= squareMask(56);
 		}
 		else
 		{
@@ -287,6 +336,9 @@ void Board::unmakeMove(Move move)
 
 			bitBoards_[PieceType::blackRook] &= ~squareMask(3);
 			bitBoards_[PieceType::blackRook] |= squareMask(0);
+
+			blackPieces_ &= ~squareMask(3);
+			blackPieces_ |= squareMask(0);
 		}
 		break;
 
@@ -295,11 +347,13 @@ void Board::unmakeMove(Move move)
 		{
 			board_[move.endPos + 8] = PieceType::blackPawn;
 			bitBoards_[PieceType::blackPawn] |= squareMask(move.endPos + 8);
+			blackPieces_ |= squareMask(move.endPos + 8);
 		}
 		else
 		{
 			board_[move.endPos - 8] = PieceType::whitePawn;
 			bitBoards_[PieceType::whitePawn] |= squareMask(move.endPos - 8);
+			whitePieces_ |= squareMask(move.endPos - 8);
 		}
 		break;
 
@@ -310,7 +364,7 @@ void Board::unmakeMove(Move move)
 	if (move.promotion != PieceType::empty)
 	{
 		bitBoards_[move.promotion] &= ~endMask;
-
+		
 		bitBoards_[move.moved] |= endMask;
 	}
 
@@ -320,10 +374,28 @@ void Board::unmakeMove(Move move)
 	bitBoards_[move.moved] &= ~endMask;
 	bitBoards_[move.moved] |= startMask;
 
+	if (move.moved < 6)
+	{
+		whitePieces_ &= ~endMask;
+		whitePieces_ |= startMask;
+	}
+	else
+	{
+		blackPieces_ &= ~endMask;
+		blackPieces_ |= startMask;
+	}
+
 	if (move.captured != PieceType::empty)
 	{
 		bitBoards_[move.captured] |= endMask;
+
+		if (move.captured < 6)
+			whitePieces_ |= endMask;
+		else
+			blackPieces_ |= endMask;
 	}
+
+	allPieces_ = whitePieces_ | blackPieces_;
 }
 
 void Board::loadStartPos()
@@ -334,6 +406,9 @@ void Board::loadStartPos()
 	for (int i = 0; i < 12; ++i)
 		bitBoards_[i] = 0ULL;
 
+	whitePieces_ = 0ULL;
+	blackPieces_ = 0ULL;
+	allPieces_ = 0ULL;
 
 	for (int i = 8; i < 16; ++i)
 	{
@@ -371,6 +446,15 @@ void Board::loadStartPos()
 	bitBoards_[PieceType::whiteBishop] |= squareMask(58) | squareMask(61);
 	bitBoards_[PieceType::whiteQueen] |= squareMask(59);
 	bitBoards_[PieceType::whiteKing] |= squareMask(60);
+
+	for (int i = 0; i < 6; i++)
+	{
+		whitePieces_|= bitBoards_[i];
+		blackPieces_ |= bitBoards_[i + 6];
+	}
+
+	allPieces_ = whitePieces_ | blackPieces_;
+	
 }
 
 void Board::draw()
@@ -398,6 +482,7 @@ void Board::draw()
 		std::cout << std::bitset<64>(bitBoards_[i]) << "\n";
 	}
 
+	std::cout << "\n" << std::bitset<64>(whitePieces_) << "\n" << std::bitset<64>(blackPieces_) << "\n" << std::bitset<64>(allPieces_);
 }
 
 uint64_t Board::getZobristKey()

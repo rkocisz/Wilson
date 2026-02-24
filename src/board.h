@@ -31,6 +31,9 @@ private:
 
 	PieceType board_[64];
 	uint64_t bitBoards_[12];
+	uint64_t whitePieces_;
+	uint64_t blackPieces_;
+	uint64_t allPieces_;
 
 	uint8_t castlingRights_;
 	int enPassantSquare_;

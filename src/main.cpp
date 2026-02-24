@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "tests.h"
+#include "board.h"
 
 int main()
 {
@@ -7,6 +8,11 @@ int main()
 
     testMoveAndUnmakeMove();
     testZobristKeyGeneration();
+
+    Board board = Board();
+
+    board.loadStartPos();
+    board.draw();
 
     return 0;
 }
