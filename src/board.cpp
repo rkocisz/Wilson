@@ -275,15 +275,15 @@ void Board::makeMove(Move move)
 
 		default:
 			break;
+	}
 
-		allPieces_ = whitePieces_ | blackPieces_;
+	allPieces_ = whitePieces_ | blackPieces_;
 
-		positionHistory_.push_back(zobristKey_);
+	positionHistory_.push_back(zobristKey_);
 
-		if (isPositionRepeatedThrice())
-		{
-			gameState_ = GameState::draw;
-		}
+	if (isPositionRepeatedThrice())
+	{
+		gameState_ = GameState::draw;
 	}
 }
 
