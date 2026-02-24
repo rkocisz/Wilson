@@ -40,5 +40,13 @@ enum Color
 	black
 };
 
+enum GameState
+{
+	playing,
+	draw,
+	winWhite,
+	winBlack
+};
+
 
 #endif

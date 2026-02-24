@@ -9,6 +9,7 @@ Board::Board()
 , enPassantSquare_(-1)
 , sideToMove_(Color::white)
 , halfmoveClock_(0)
+, gameState_(GameState::playing)
 {
 	for (int i = 0; i < 64; ++i)
 		board_[i] = PieceType::empty;
@@ -20,6 +21,7 @@ Board::Board()
 
 	initZobrist();
 	zobristKey_ = computeZobrist();
+	positionHistory_.push_back(zobristKey_);
 }
 
 void Board::makeMove(Move move)
@@ -275,11 +277,20 @@ void Board::makeMove(Move move)
 			break;
 
 		allPieces_ = whitePieces_ | blackPieces_;
+
+		positionHistory_.push_back(zobristKey_);
+
+		if (isPositionRepeatedThrice())
+		{
+			gameState_ = GameState::draw;
+		}
 	}
 }
 
 void Board::unmakeMove(Move move)
 {
+	positionHistory_.pop_back();
+
 	zobristKey_ = move.prevZobristKey;
 
 	sideToMove_ = opposite(sideToMove_);
@@ -485,6 +496,11 @@ void Board::draw()
 	std::cout << "\n" << std::bitset<64>(whitePieces_) << "\n" << std::bitset<64>(blackPieces_) << "\n" << std::bitset<64>(allPieces_);
 }
 
+GameState Board::getGamestate()
+{
+	return gameState_;
+}
+
 uint64_t Board::getZobristKey()
 {
 	return zobristKey_;
@@ -553,4 +569,23 @@ uint64_t Board::computeZobrist()
 	}
 
 	return key;
+}
+
+bool Board::isPositionRepeatedThrice()
+{
+	int count = 0;
+
+	for (int i = positionHistory_.size() - 1; i >= 0; i--)
+	{
+		if (positionHistory_[i] == zobristKey_)
+			count++;
+
+		if (count >= 3)
+			return true;
+
+		if (halfmoveClock_ < positionHistory_.size() - i)
+			break;
+	}
+
+	return false;
 }

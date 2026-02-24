@@ -19,6 +19,7 @@ public:
 	void makeMove(Move move);
 	void unmakeMove(Move move);
 	void loadStartPos();
+	GameState getGamestate();
 	uint64_t getZobristKey();
 	uint64_t getNewlyGeneratedZobristKey();
 
@@ -28,6 +29,7 @@ private:
 	inline Color opposite(Color c);
 	void initZobrist();
 	uint64_t computeZobrist();
+	bool isPositionRepeatedThrice();
 
 	PieceType board_[64];
 	uint64_t bitBoards_[12];
@@ -39,6 +41,10 @@ private:
 	int enPassantSquare_;
 	Color sideToMove_;
 	int halfmoveClock_;
+
+	std::vector<uint64_t> positionHistory_;
+
+	GameState gameState_;
 
 	//Zobrist
 	uint64_t zobristPiece_[12][64];

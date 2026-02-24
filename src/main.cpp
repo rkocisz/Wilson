@@ -8,10 +8,10 @@ int main()
 
     testMoveAndUnmakeMove();
     testZobristKeyGeneration();
+    thriceRepetitionTest();
 
     Board board = Board();
 
-    board.loadStartPos();
     board.draw();
 
     return 0;
