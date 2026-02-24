@@ -102,10 +102,10 @@ void thriceRepetitionTest()
     move4.prevHalfmoveClock = 0;
     move4.prevZobristKey = board.getZobristKey();
 
+    assert(board.getGamestate() == GameState::playing);
+
     for (int i = 0; i < 3; i++)
     {
-        assert(board.getGamestate() == GameState::playing);
-
         move.prevHalfmoveClock = i * 4; 
         move.prevZobristKey = board.getZobristKey();
         board.makeMove(move);
