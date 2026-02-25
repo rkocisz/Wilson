@@ -24,7 +24,6 @@ public:
 	uint64_t getNewlyGeneratedZobristKey();
 
 private:
-
 	inline uint64_t squareMask(int square);	
 	inline Color opposite(Color c);
 	void initZobrist();
@@ -37,6 +36,9 @@ private:
 	uint64_t blackPieces_;
 	uint64_t allPieces_;
 
+	std::vector<Move> pseudoLegalMoves_;
+	std::vector<Move> legalMoves_;
+
 	uint8_t castlingRights_;
 	int enPassantSquare_;
 	Color sideToMove_;
@@ -45,6 +47,23 @@ private:
 	std::vector<uint64_t> positionHistory_;
 
 	GameState gameState_;
+
+	//Move generation
+	void generatePseudoLegalMoves();
+
+	void generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateWhiteKnightMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateWhiteBishopMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateWhiteRookMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateWhiteQueenMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateWhiteKingMoves(std::vector<Move>& pseudoLegalMoves);
+
+	void generateBlackPawnMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateBlackKnightMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateBlackBishopMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateBlackRookMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateBlackQueenMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateBlackKingMoves(std::vector<Move>& pseudoLegalMoves);
 
 	//Zobrist
 	uint64_t zobristPiece_[12][64];

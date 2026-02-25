@@ -589,3 +589,31 @@ bool Board::isPositionRepeatedThrice()
 
 	return false;
 }
+
+void Board::generatePseudoLegalMoves()
+{
+	if (sideToMove_ == Color::white)
+	{
+		/*generateWhitePawnMoves(pseudoLegalMoves_);
+		generateWhiteKnightMoves(pseudoLegalMoves_);
+		generateWhiteBishopMoves(pseudoLegalMoves_);
+		generateWhiteRookMoves(pseudoLegalMoves_);
+		generateWhiteQueenMoves(pseudoLegalMoves_);
+		generateWhiteKingMoves(pseudoLegalMoves_);*/
+	}
+	else
+	{
+		/*generateBlackPawnMoves(pseudoLegalMoves_);
+		generateBlackKnightMoves(pseudoLegalMoves_);
+		generateBlackBishopMoves(pseudoLegalMoves_);
+		generateBlackRookMoves(pseudoLegalMoves_);
+		generateBlackQueenMoves(pseudoLegalMoves_);
+		generateBlackKingMoves(pseudoLegalMoves_);*/
+	}
+	
+}
+
+void Board::generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves)
+{
+	uint64_t singlePush = (bitBoards_[PieceType::whitePawn] << 8) & ~allPieces_;
+}
