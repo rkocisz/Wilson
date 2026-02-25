@@ -590,7 +590,7 @@ bool Board::isPositionRepeatedThrice()
 	return false;
 }
 
-void Board::generatePseudoLegalMoves()
+std::vector<Move> Board::generatePseudoLegalMoves()
 {
 	if (sideToMove_ == Color::white)
 	{
@@ -610,36 +610,111 @@ void Board::generatePseudoLegalMoves()
 		generateBlackQueenMoves(pseudoLegalMoves_);
 		generateBlackKingMoves(pseudoLegalMoves_);*/
 	}
-	
+	return pseudoLegalMoves_;
 }
 
 void Board::generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves)
 {
+	uint64_t captureLeft = (bitBoards_[PieceType::whitePawn] << 9) & blackPieces_ & ~FILE_H;
+	uint64_t captureRight= (bitBoards_[PieceType::whitePawn] << 7) & blackPieces_ & ~FILE_A;
+
+	uint64_t promoLeft = captureLeft & RANK_8;
+	uint64_t promoRight = captureRight & RANK_8;
+
+	uint64_t normalLeft = captureLeft & ~RANK_8;
+	uint64_t normalRight = captureRight & ~RANK_8;
+
 	uint64_t singlePush = (bitBoards_[PieceType::whitePawn] << 8) & ~allPieces_;
 
-	while (singlePush)
+	uint64_t singlePushPromo = singlePush & RANK_8;
+	uint64_t singlePushNonPromo = singlePush & ~RANK_8;
+
+	uint64_t doublePush = ((singlePush & RANK_3) << 8) & ~allPieces_;
+
+	uint64_t enPassantLeft = 0ULL;
+	uint64_t enPassantRight = 0ULL;
+
+	if(enPassantSquare_ != -1)
 	{
-		int endPos = 63 - Util::popLSB(singlePush);
-		int startPos = endPos + 8;
+		uint64_t enPassantLeft = (bitBoards_[PieceType::whitePawn] << 9) & squareMask(enPassantSquare_) & ~FILE_H;
+		uint64_t enPassantRight = (bitBoards_[PieceType::whitePawn] << 7) & squareMask(enPassantSquare_) & ~FILE_A;
+	}
 
-		Move move = Move();
-		move.startPos = startPos;
-		move.endPos = endPos;
-		move.captured = PieceType::empty;
-		move.moved = PieceType::whitePawn;
-		move.moveType = MoveType::normal;
-		move.promotion = PieceType::empty;
-		move.prevCastlingRights = castlingRights_;
-		move.prevEnPassantSquare = enPassantSquare_;
-		move.prevHalfmoveClock = halfmoveClock_;
-		move.prevZobristKey = zobristKey_;
+	while(enPassantLeft)
+	{
+		int endPos = 63 - Util::popLSB(enPassantLeft);
+		int startPos = endPos + 9;
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, PieceType::empty, MoveType::enPassant, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+	}
 
-		if (endPos < 8)
+	while (enPassantRight)
+	{
+		int endPos = 63 - Util::popLSB(enPassantRight);
+		int startPos = endPos + 7;
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, PieceType::empty, MoveType::enPassant, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+	}
+
+	while (normalLeft)
+	{
+		int endPos = 63 - Util::popLSB(normalLeft);
+		int startPos = endPos + 9;
+
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], PieceType::empty, MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+	}
+	
+	while (normalRight)
+	{
+		int endPos = 63 - Util::popLSB(normalRight);
+		int startPos = endPos + 7;
+
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], PieceType::empty, MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+	}
+
+	while (promoLeft)
+	{
+		int endPos = 63 - Util::popLSB(promoLeft);
+		int startPos = endPos + 9;
+
+		for (int i = 1; i < 5; i++)
 		{
-			for (int i = 0; i < 4; i++)
-			{
-				move.promotion = PieceType(i + 1);
-			}
+			pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
 		}
 	}
+
+	while (promoRight)
+	{
+		int endPos = 63 - Util::popLSB(promoRight);
+		int startPos = endPos + 7;
+		for (int i = 1; i < 5; i++)
+		{
+			pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+		}
+	}
+
+	while (singlePushPromo)
+	{
+		int endPos = 63 - Util::popLSB(singlePushPromo);
+		int startPos = endPos + 8;
+		for (int i = 1; i < 5; i++)
+		{
+			pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+		}
+	}
+
+	while (singlePushNonPromo)
+	{
+		int endPos = 63 - Util::popLSB(singlePushNonPromo);
+		int startPos = endPos + 8;
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], PieceType::empty, MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+	}
+
+	while(doublePush)
+	{
+		int endPos = 63 - Util::popLSB(doublePush);
+		int startPos = endPos + 16;
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], PieceType::empty, MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+	}
+
+	
+	
 }

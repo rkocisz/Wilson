@@ -49,7 +49,7 @@ private:
 	GameState gameState_;
 
 	//Move generation
-	void generatePseudoLegalMoves();
+	std::vector<Move> generatePseudoLegalMoves();
 
 	void generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves);
 	void generateWhiteKnightMoves(std::vector<Move>& pseudoLegalMoves);
