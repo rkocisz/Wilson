@@ -16,6 +16,8 @@ struct Move
 	int prevEnPassantSquare;
 	int prevHalfmoveClock;
 	uint64_t prevZobristKey;
+
+	bool operator==(const Move&) const = default; 
 };
 
 #endif 

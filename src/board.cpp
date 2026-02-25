@@ -616,4 +616,30 @@ void Board::generatePseudoLegalMoves()
 void Board::generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves)
 {
 	uint64_t singlePush = (bitBoards_[PieceType::whitePawn] << 8) & ~allPieces_;
+
+	while (singlePush)
+	{
+		int endPos = 63 - Util::popLSB(singlePush);
+		int startPos = endPos + 8;
+
+		Move move = Move();
+		move.startPos = startPos;
+		move.endPos = endPos;
+		move.captured = PieceType::empty;
+		move.moved = PieceType::whitePawn;
+		move.moveType = MoveType::normal;
+		move.promotion = PieceType::empty;
+		move.prevCastlingRights = castlingRights_;
+		move.prevEnPassantSquare = enPassantSquare_;
+		move.prevHalfmoveClock = halfmoveClock_;
+		move.prevZobristKey = zobristKey_;
+
+		if (endPos < 8)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				move.promotion = PieceType(i + 1);
+			}
+		}
+	}
 }

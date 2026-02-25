@@ -15,7 +15,5 @@ int main()
 
     board.draw();
 
-    std::cout << std::countr_zero(0ULL);
-
     return 0;
 }
