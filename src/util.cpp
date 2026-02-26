@@ -13,7 +13,7 @@ namespace Util
 		return rng();
 	}
 
-	inline int popLSB(uint64_t& x)
+	int popLSB(uint64_t& x)
 	{
 		int bitPos = std::countr_zero(x);
 		x &= x - 1;

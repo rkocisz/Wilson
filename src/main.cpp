@@ -2,6 +2,7 @@
 #include <bit>
 #include "tests.h"
 #include "board.h"
+#include "structs.h"
 
 int main()
 {
@@ -14,6 +15,13 @@ int main()
     Board board = Board();
 
     board.draw();
+
+	std::vector<Move> moves = board.generatePseudoLegalMoves();
+
+	for (Move move : moves)
+    {
+        std::cout << "Move from " << move.startPos << " to " << move.endPos << std::endl;
+    }
 
     return 0;
 }

@@ -300,6 +300,8 @@ void Board::unmakeMove(Move move)
 	enPassantSquare_ = unmakeStack_.top().prevEnPassantSquare;
 	halfmoveClock_ = unmakeStack_.top().prevHalfmoveClock;
 
+	unmakeStack_.pop();
+
 	uint64_t startMask = squareMask(move.startPos);
 	uint64_t endMask = squareMask(move.endPos);
 
@@ -474,6 +476,11 @@ void Board::draw()
 {
 	for (int i = 0; i < 64; i++)
 	{
+		if (i % 8 == 0)
+		{
+			std::cout << 8 - i / 8 << " ";
+		}
+
 		if (board_[i] == PieceType::empty)
 		{
 			std::cout << ". ";
@@ -485,9 +492,18 @@ void Board::draw()
 
 		if ((i + 1) % 8 == 0)
 		{
-			std::cout << "\n" << 8 - i / 8 << " ";
+			std::cout << "\n";
 		}
 	}
+
+	std::cout << "  ";
+
+	for (int i = 0; i < 8; i++)
+	{
+		std::cout << char('a' + i) << " ";
+	}
+
+
 	std::cout << "\n\n\n";
 
 	for (int i = 0; i < 12; i++)
@@ -495,7 +511,7 @@ void Board::draw()
 		std::cout << std::bitset<64>(bitBoards_[i]) << "\n";
 	}
 
-	std::cout << "\n" << std::bitset<64>(whitePieces_) << "\n" << std::bitset<64>(blackPieces_) << "\n" << std::bitset<64>(allPieces_);
+	std::cout << "\n" << std::bitset<64>(whitePieces_) << "\n" << std::bitset<64>(blackPieces_) << "\n" << std::bitset<64>(allPieces_) << "\n";
 }
 
 GameState Board::getGamestate()
@@ -596,8 +612,8 @@ std::vector<Move> Board::generatePseudoLegalMoves()
 {
 	if (sideToMove_ == Color::white)
 	{
-		/*generateWhitePawnMoves(pseudoLegalMoves_);
-		generateWhiteKnightMoves(pseudoLegalMoves_);
+		generateWhitePawnMoves(pseudoLegalMoves_);
+		/*generateWhiteKnightMoves(pseudoLegalMoves_);
 		generateWhiteBishopMoves(pseudoLegalMoves_);
 		generateWhiteRookMoves(pseudoLegalMoves_);
 		generateWhiteQueenMoves(pseudoLegalMoves_);
@@ -646,14 +662,14 @@ void Board::generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves)
 	{
 		int endPos = 63 - Util::popLSB(enPassantLeft);
 		int startPos = endPos + 9;
-		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, PieceType::empty, MoveType::enPassant, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, PieceType::empty, MoveType::enPassant);
 	}
 
 	while (enPassantRight)
 	{
 		int endPos = 63 - Util::popLSB(enPassantRight);
 		int startPos = endPos + 7;
-		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, PieceType::empty, MoveType::enPassant, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, PieceType::empty, MoveType::enPassant);
 	}
 
 	while (normalLeft)
@@ -661,7 +677,7 @@ void Board::generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves)
 		int endPos = 63 - Util::popLSB(normalLeft);
 		int startPos = endPos + 9;
 
-		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], PieceType::empty, MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], PieceType::empty, MoveType::normal);
 	}
 	
 	while (normalRight)
@@ -669,7 +685,7 @@ void Board::generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves)
 		int endPos = 63 - Util::popLSB(normalRight);
 		int startPos = endPos + 7;
 
-		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], PieceType::empty, MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], PieceType::empty, MoveType::normal);
 	}
 
 	while (promoLeft)
@@ -679,7 +695,7 @@ void Board::generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves)
 
 		for (int i = 1; i < 5; i++)
 		{
-			pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+			pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal);
 		}
 	}
 
@@ -689,7 +705,7 @@ void Board::generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves)
 		int startPos = endPos + 7;
 		for (int i = 1; i < 5; i++)
 		{
-			pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+			pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal);
 		}
 	}
 
@@ -699,7 +715,7 @@ void Board::generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves)
 		int startPos = endPos + 8;
 		for (int i = 1; i < 5; i++)
 		{
-			pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, static_cast<PieceType>(i), MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+			pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, static_cast<PieceType>(i), MoveType::normal);
 		}
 	}
 
@@ -707,14 +723,14 @@ void Board::generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves)
 	{
 		int endPos = 63 - Util::popLSB(singlePushNonPromo);
 		int startPos = endPos + 8;
-		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, PieceType::empty, MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, PieceType::empty, MoveType::normal);
 	}
 
 	while(doublePush)
 	{
 		int endPos = 63 - Util::popLSB(doublePush);
 		int startPos = endPos + 16;
-		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, PieceType::empty, MoveType::normal, castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_);
+		pseudoLegalMoves.emplace_back(startPos, endPos, PieceType::whitePawn, PieceType::empty, PieceType::empty, MoveType::normal);
 	}
 
 	

@@ -24,6 +24,8 @@ public:
 	uint64_t getZobristKey();
 	uint64_t getNewlyGeneratedZobristKey();
 
+	std::vector<Move> generatePseudoLegalMoves();
+
 private:
 	inline uint64_t squareMask(int square);	
 	inline Color opposite(Color c);
@@ -51,7 +53,7 @@ private:
 	GameState gameState_;
 
 	//Move generation
-	std::vector<Move> generatePseudoLegalMoves();
+	
 
 	void generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves);
 	void generateWhiteKnightMoves(std::vector<Move>& pseudoLegalMoves);

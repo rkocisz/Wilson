@@ -7,7 +7,7 @@
 namespace Util
 {
 	uint64_t randomU64();
-    inline int popLSB(uint64_t& bb);
+    int popLSB(uint64_t& bb);
 }
 
 
