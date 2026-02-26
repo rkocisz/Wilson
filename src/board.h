@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <stack>
 #include <cinttypes>
 #include <random>
 #include "enums.h"
@@ -45,6 +46,7 @@ private:
 	int halfmoveClock_;
 
 	std::vector<uint64_t> positionHistory_;
+	std::stack<UnmakeInfo> unmakeStack_;
 
 	GameState gameState_;
 
