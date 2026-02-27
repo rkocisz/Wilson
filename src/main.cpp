@@ -1,8 +1,10 @@
 #include <windows.h>
 #include <bit>
+#include <bitset>
 #include "tests.h"
 #include "board.h"
 #include "structs.h"
+#include "util.h"
 
 int main()
 {

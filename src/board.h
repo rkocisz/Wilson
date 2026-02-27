@@ -27,7 +27,6 @@ public:
 	std::vector<Move> generatePseudoLegalMoves();
 
 private:
-	inline uint64_t squareMask(int square);	
 	inline Color opposite(Color c);
 	void initZobrist();
 	uint64_t computeZobrist();
