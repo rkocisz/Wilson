@@ -24,10 +24,10 @@ public:
 	uint64_t getZobristKey();
 	uint64_t getNewlyGeneratedZobristKey();
 
-	std::vector<Move> generatePseudoLegalMoves();
+	void generatePseudoLegalMoves();
+	std::vector<Move> generateLegalMoves();
 
 private:
-	inline Color opposite(Color c);
 	void initZobrist();
 	uint64_t computeZobrist();
 	bool isPositionRepeatedThrice();
@@ -54,19 +54,21 @@ private:
 	//Move generation
 	
 
-	void generateWhitePawnMoves(std::vector<Move>& pseudoLegalMoves);
-	void generateWhiteKnightMoves(std::vector<Move>& pseudoLegalMoves);
-	void generateWhiteBishopMoves(std::vector<Move>& pseudoLegalMoves);
-	void generateWhiteRookMoves(std::vector<Move>& pseudoLegalMoves);
-	void generateWhiteQueenMoves(std::vector<Move>& pseudoLegalMoves);
-	void generateWhiteKingMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateWhitePawnMoves();
+	void generateWhiteKnightMoves();
+	void generateWhiteBishopMoves();
+	void generateWhiteRookMoves();
+	void generateWhiteQueenMoves();
+	void generateWhiteKingMoves();
 
-	void generateBlackPawnMoves(std::vector<Move>& pseudoLegalMoves);
-	void generateBlackKnightMoves(std::vector<Move>& pseudoLegalMoves);
-	void generateBlackBishopMoves(std::vector<Move>& pseudoLegalMoves);
-	void generateBlackRookMoves(std::vector<Move>& pseudoLegalMoves);
-	void generateBlackQueenMoves(std::vector<Move>& pseudoLegalMoves);
-	void generateBlackKingMoves(std::vector<Move>& pseudoLegalMoves);
+	void generateBlackPawnMoves();
+	void generateBlackKnightMoves();
+	void generateBlackBishopMoves();
+	void generateBlackRookMoves();
+	void generateBlackQueenMoves();
+	void generateBlackKingMoves();
+
+	bool isSquareAttacked(int square, Color attacker);
 
 	//Zobrist
 	uint64_t zobristPiece_[12][64];

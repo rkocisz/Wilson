@@ -85,9 +85,80 @@ namespace Util
 		}
 	}
 
+	uint64_t computeBishopMoves(int square, uint64_t occupancy)
+	{
+		uint64_t moves = 0ULL;
+		int rank = square / 8;
+		int file = square % 8;
+		for (int r = rank + 1, f = file + 1; r < 8 && f < 8; r++, f++)
+		{
+			moves |= squareMask(r * 8 + f);
+			if (occupancy & squareMask(r * 8 + f))
+				break;
+		}
+		for (int r = rank + 1, f = file - 1; r < 8 && f >= 0; r++, f--)
+		{
+			moves |= squareMask(r * 8 + f);
+			if (occupancy & squareMask(r * 8 + f))
+				break;
+		}
+		for (int r = rank - 1, f = file + 1; r >= 0 && f < 8; r--, f++)
+		{
+			moves |= squareMask(r * 8 + f);
+			if (occupancy & squareMask(r * 8 + f))
+				break;
+		}
+		for (int r = rank - 1, f = file - 1; r >= 0 && f >= 0; r--, f--)
+		{
+			moves |= squareMask(r * 8 + f);
+			if (occupancy & squareMask(r * 8 + f))
+				break;
+		}
+		return moves;
+	}
+
+	uint64_t computeRookMoves(int square, uint64_t occupancy)
+	{
+		uint64_t moves = 0ULL;
+		int rank = square / 8;
+		int file = square % 8;
+
+		for (int r = rank + 1; r < 8; r++)
+		{
+			moves |= squareMask(r * 8 + file);
+			if (occupancy & squareMask(r * 8 + file))
+				break;
+		}
+		for (int r = rank - 1; r >= 0; r--)
+		{
+			moves |= squareMask(r * 8 + file);
+			if (occupancy & squareMask(r * 8 + file))
+				break;
+		}
+		for (int f = file + 1; f < 8; f++)
+		{
+			moves |= squareMask(rank * 8 + f);
+			if (occupancy & squareMask(rank * 8 + f))
+				break;
+		}
+		for (int f = file - 1; f >= 0; f--)
+		{
+			moves |= squareMask(rank * 8 + f);
+			if (occupancy & squareMask(rank * 8 + f))
+				break;
+		}
+
+		return moves;
+	}
+
 	uint64_t squareMask(int square)
 	{
 		return 1ULL << (63 - square);
+	}
+
+	Color opposite(Color c)
+	{
+		return (c == white) ? black : white;
 	}
 }
 

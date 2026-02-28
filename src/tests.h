@@ -2,6 +2,7 @@
 #define TESTS_H
 
 #include "board.h"
+#include "enums.h"
 #include <cassert>
 #include <iostream>
 #include <cinttypes>
@@ -58,6 +59,39 @@ void thriceRepetitionTest()
 
     assert(board.getGamestate() == GameState::draw);
 
+}
+
+long long perftRecursion(int depth, Board& board)
+{
+    std::vector<Move> legalMoves = board.generateLegalMoves();
+
+    if (depth == 0)
+    {
+        return 1;
+    }
+
+    long long movesCount = 0;
+    
+    for (Move& move : legalMoves)
+    {
+        board.makeMove(move);
+        movesCount += perftRecursion(depth - 1, board);
+        board.unmakeMove(move);
+    }
+
+    return movesCount;
+}
+
+void perft()
+{
+    Board board = Board();
+
+    assert(perftRecursion(1, board) == 20);
+    assert(perftRecursion(2, board) == 400);
+    assert(perftRecursion(2, board) == 8902);
+    assert(perftRecursion(2, board) == 197281);
+    assert(perftRecursion(2, board) == 4865609);
+    assert(perftRecursion(2, board) == 119060324);
 }
 
 #endif
