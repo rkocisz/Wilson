@@ -63,13 +63,12 @@ void thriceRepetitionTest()
 
 long long perftRecursion(int depth, Board& board)
 {
-    std::vector<Move> legalMoves = board.generateLegalMoves();
-
     if (depth == 0)
     {
         return 1;
     }
 
+    std::vector<Move> legalMoves = board.generateLegalMoves();
     long long movesCount = 0;
     
     for (Move& move : legalMoves)

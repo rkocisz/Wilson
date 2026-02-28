@@ -3,7 +3,8 @@
 
 namespace Util
 {
-	uint64_t knightAttacks_[64];
+	uint64_t knightMoves_[64];
+	uint64_t kingMoves_[64];
 
 	namespace
 	{
@@ -50,7 +51,7 @@ namespace Util
 				if (rank + 1 < 8) moves |= squareMask(sq + 6);
 				if (rank - 1 >= 0) moves |= squareMask(sq - 10);
 			}
-			knightAttacks_[sq] = moves;
+			knightMoves_[sq] = moves;
 		}
 	}
 

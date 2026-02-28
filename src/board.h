@@ -31,6 +31,7 @@ private:
 	void initZobrist();
 	uint64_t computeZobrist();
 	bool isPositionRepeatedThrice();
+	bool isSquareAttacked(int square, Color attacker);
 
 	PieceType board_[64];
 	uint64_t bitBoards_[12];
@@ -68,7 +69,7 @@ private:
 	void generateBlackQueenMoves();
 	void generateBlackKingMoves();
 
-	bool isSquareAttacked(int square, Color attacker);
+	
 
 	//Zobrist
 	uint64_t zobristPiece_[12][64];

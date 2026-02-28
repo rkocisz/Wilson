@@ -634,20 +634,23 @@ std::vector<Move> Board::generateLegalMoves()
 
 	Color moving = sideToMove_;
 
-	for (Move move : pseudoLegalMoves_)
+	for (const Move& move : pseudoLegalMoves_)
 	{
-		this->makeMove(move);
+		makeMove(move);
 
-		int kingPos = 63 - std::countr_zero(bitBoards_[moving == Color::white ? PieceType::whiteKing : PieceType::blackKing]);
+		uint64_t kingMask = bitBoards_[moving == Color::white ? PieceType::whiteKing : PieceType::blackKing];
+		int kingPos = 63 - Util::popLSB(kingMask);
 			
 		if (!isSquareAttacked(kingPos, Util::opposite(moving)))
 		{
+			std::cout << "move";
 			legalMoves_.push_back(move);
 		}
 
-		this->unmakeMove(move);
+		unmakeMove(move);
 
 	}
+	return legalMoves_;
 }
 
 void Board::generateWhitePawnMoves()
@@ -832,11 +835,11 @@ void Board::generateWhiteKingMoves()
 
 	if (castlingRights_ & CastlingRights::whiteKingSide && !(allPieces_ & (Util::squareMask(61) | Util::squareMask(62))))
 	{
-		pseudoLegalMoves_.emplace_back(60, 62, PieceType::whiteKing, PieceType::empty, MoveType::shortCastle);
+		pseudoLegalMoves_.emplace_back(60, 62, PieceType::whiteKing, PieceType::empty, PieceType::empty, MoveType::shortCastle);
 	}
 	if (castlingRights_ & CastlingRights::whiteQueenSide && !(allPieces_ & (Util::squareMask(59) | Util::squareMask(58) | Util::squareMask(57))))
 	{
-		pseudoLegalMoves_.emplace_back(60, 58, PieceType::whiteKing, PieceType::empty, MoveType::longCastle);
+		pseudoLegalMoves_.emplace_back(60, 58, PieceType::whiteKing, PieceType::empty, PieceType::empty, MoveType::longCastle);
 	}
 }
 
@@ -1022,11 +1025,11 @@ void Board::generateBlackKingMoves()
 
 	if (castlingRights_ & CastlingRights::blackKingSide && !(allPieces_ & (Util::squareMask(5) | Util::squareMask(6))))
 	{
-		pseudoLegalMoves_.emplace_back(4, 6, PieceType::blackKing, PieceType::empty, MoveType::shortCastle);
+		pseudoLegalMoves_.emplace_back(4, 6, PieceType::blackKing, PieceType::empty, PieceType::empty, MoveType::shortCastle);
 	}
 	if (castlingRights_ & CastlingRights::blackQueenSide && !(allPieces_ & (Util::squareMask(1) | Util::squareMask(2) | Util::squareMask(3))))
 	{
-		pseudoLegalMoves_.emplace_back(4, 2, PieceType::blackKing, PieceType::empty, MoveType::longCastle);
+		pseudoLegalMoves_.emplace_back(4, 2, PieceType::blackKing, PieceType::empty, PieceType::empty, MoveType::longCastle);
 	}
 }
 
