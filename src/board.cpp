@@ -633,17 +633,25 @@ std::vector<Move> Board::generateLegalMoves()
 	generatePseudoLegalMoves();
 
 	Color moving = sideToMove_;
+	uint64_t kingMask = 0ULL;
 
 	for (const Move& move : pseudoLegalMoves_)
 	{
 		makeMove(move);
 
-		uint64_t kingMask = bitBoards_[moving == Color::white ? PieceType::whiteKing : PieceType::blackKing];
+		if (moving == Color::white)
+		{
+			kingMask = bitBoards_[PieceType::whiteKing];
+		}
+		else
+		{
+			kingMask = bitBoards_[PieceType::blackKing];
+		}
+		
 		int kingPos = 63 - Util::popLSB(kingMask);
-			
+
 		if (!isSquareAttacked(kingPos, Util::opposite(moving)))
 		{
-			std::cout << "move";
 			legalMoves_.push_back(move);
 		}
 
@@ -824,7 +832,7 @@ void Board::generateWhiteQueenMoves()
 
 void Board::generateWhiteKingMoves()
 {
-	int startPos = 63 - Util::popLSB(bitBoards_[PieceType::whiteKing]);
+	int startPos = 63 - std::countr_zero(bitBoards_[PieceType::whiteKing]);
 	uint64_t kingMoves = Util::kingMoves_[startPos] & ~whitePieces_;
 
 	while (kingMoves)
@@ -1014,7 +1022,7 @@ void Board::generateBlackQueenMoves()
 
 void Board::generateBlackKingMoves()
 {
-	int startPos = 63 - Util::popLSB(bitBoards_[PieceType::blackKing]);
+	int startPos = 63 - std::countr_zero(bitBoards_[PieceType::blackKing]);
 	uint64_t kingMoves = Util::kingMoves_[startPos] & ~blackPieces_;
 
 	while (kingMoves)
@@ -1046,6 +1054,7 @@ bool Board::isSquareAttacked(int square, Color attacker)
 		if (Util::knightMoves_[square] & bitBoards_[PieceType::whiteKnight])
 			return true;
 
+
 		if (Util::kingMoves_[square] & bitBoards_[PieceType::whiteKing])
 			return true;
 
@@ -1054,6 +1063,7 @@ bool Board::isSquareAttacked(int square, Color attacker)
 
 		if(Util::computeRookMoves(square, allPieces_) & (bitBoards_[PieceType::whiteRook] | bitBoards_[PieceType::whiteQueen]))
 			return true;
+
 	}
 	else
 	{
@@ -1073,4 +1083,6 @@ bool Board::isSquareAttacked(int square, Color attacker)
 		if (Util::computeRookMoves(square, allPieces_) & (bitBoards_[PieceType::blackRook] | bitBoards_[PieceType::blackQueen]))
 			return true;
 	}
+
+	return false;
 }

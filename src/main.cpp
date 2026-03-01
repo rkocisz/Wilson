@@ -10,10 +10,11 @@ int main()
 {
     SetConsoleOutputCP(CP_UTF8);
 
-    testMoveAndUnmakeMove();
-    testZobristKeyGeneration();
-    thriceRepetitionTest();
+    //testMoveAndUnmakeMove();
+    //testZobristKeyGeneration();
+    //thriceRepetitionTest();
     perft();
+
 
     return 0;
 }

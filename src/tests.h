@@ -85,12 +85,14 @@ void perft()
 {
     Board board = Board();
 
+    std::cout << perftRecursion(3, board);
+
     assert(perftRecursion(1, board) == 20);
     assert(perftRecursion(2, board) == 400);
-    assert(perftRecursion(2, board) == 8902);
-    assert(perftRecursion(2, board) == 197281);
-    assert(perftRecursion(2, board) == 4865609);
-    assert(perftRecursion(2, board) == 119060324);
+    assert(perftRecursion(3, board) == 8902);
+    assert(perftRecursion(4, board) == 197281);
+    assert(perftRecursion(5, board) == 4865609);
+    assert(perftRecursion(6, board) == 119060324);
 }
 
 #endif
