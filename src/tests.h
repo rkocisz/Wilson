@@ -6,6 +6,7 @@
 #include <cassert>
 #include <iostream>
 #include <cinttypes>
+#include <chrono>
 
 void testMoveAndUnmakeMove()
 {
@@ -85,14 +86,68 @@ void perft()
 {
     Board board = Board();
 
-    std::cout << perftRecursion(3, board);
+    auto start = std::chrono::high_resolution_clock::now();
 
-    assert(perftRecursion(1, board) == 20);
-    assert(perftRecursion(2, board) == 400);
-    assert(perftRecursion(3, board) == 8902);
-    assert(perftRecursion(4, board) == 197281);
-    assert(perftRecursion(5, board) == 4865609);
-    assert(perftRecursion(6, board) == 119060324);
+    if (perftRecursion(1, board) == 20)
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+
+    if (perftRecursion(2, board) == 400)
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+
+    if (perftRecursion(3, board) == 8902)
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+
+    if (perftRecursion(4, board) == 197281)
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+
+    if (perftRecursion(5, board) == 4865609)
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+
+    if (perftRecursion(6, board) == 119060324)
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end - start;    
+
+    std::cout << "perft took: " << elapsed.count() << " seconds\n";
+    std::cout << "nodes per second: " << static_cast<uint64_t>(124132536 / elapsed.count()) << "\n";
+
 }
 
 #endif

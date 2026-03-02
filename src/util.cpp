@@ -1,10 +1,14 @@
 #include "util.h"
+#include "common.h"
+
 #include <bit>
 
 namespace Util
 {
 	uint64_t knightMoves_[64];
 	uint64_t kingMoves_[64];
+	uint64_t bishopRelevant_[64];
+	uint64_t rookRelevant_[64];
 
 	namespace
 	{
@@ -83,6 +87,15 @@ namespace Util
 				moves |= squareMask(sq - 1);
 			}
 			kingMoves_[sq] = moves;
+		}
+	}
+
+	void initRelevantOccupancy()
+	{
+		for (int i = 0; i < 64; i++)
+		{
+			bishopRelevant_[i] = computeBishopMoves(i, 0ULL) & ~FILE_H & ~FILE_A & ~RANK_1 & ~RANK_8;
+			rookRelevant_[i] = computeRookMoves(i, 0ULL) & ~FILE_H & ~FILE_A & ~RANK_1 & ~RANK_8;
 		}
 	}
 
