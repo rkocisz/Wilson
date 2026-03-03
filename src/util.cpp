@@ -200,7 +200,9 @@ namespace Util
 	{
 		uint64_t startingMask = bishopMagic_[square].relevantMask;
 		uint64_t occupancyMask = 0ULL;
-		
+
+		int i = 0;
+
 	}
 	
 	uint64_t generateRookOccupancyFromIndex(int square, int index)
