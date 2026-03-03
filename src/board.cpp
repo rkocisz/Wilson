@@ -26,6 +26,7 @@ Board::Board()
 
 	Util::initKnightMoves();
 	Util::initKingMoves();
+	Util::initMagicBitboards();
 }
 
 void Board::makeMove(Move move)
@@ -491,7 +492,7 @@ void Board::draw()
 		}
 		else
 		{
-			std::cout << piecesEmotes_[board_[i]] << " ";
+			std::cout << Util::piecesEmotes_[board_[i]] << " ";
 		}
 
 		if ((i + 1) % 8 == 0)

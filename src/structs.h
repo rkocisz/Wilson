@@ -36,4 +36,14 @@ struct UnmakeInfo
 	bool operator==(const UnmakeInfo&) const = default;
 };
 
+struct MagicInfo
+{
+	uint64_t relevantMask;
+	uint64_t magic;
+	int relevantBits;
+	int shift;
+	std::vector<uint64_t> occupancyVariations;
+	bool operator==(const MagicInfo&) const = default;
+};
+
 #endif 

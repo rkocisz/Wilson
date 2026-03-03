@@ -1,5 +1,6 @@
-#include "util.h"
+﻿#include "util.h"
 #include "common.h"
+#include "structs.h"
 
 #include <bit>
 
@@ -7,12 +8,15 @@ namespace Util
 {
 	uint64_t knightMoves_[64];
 	uint64_t kingMoves_[64];
-	uint64_t bishopRelevant_[64];
-	uint64_t rookRelevant_[64];
+	const char* piecesEmotes_[12] = { "♚", "♛", "♜", "♝", "♞", "♟","♔", "♕", "♖", "♗", "♘", "♙" };
 
 	namespace
 	{
 		std::mt19937_64 rng(123456);
+		MagicInfo bishopMagic_[64];
+		MagicInfo rookMagic_[64];
+		uint64_t bishopMoves_[64][512];
+		uint64_t rookMoves_[64][1024];
 	}
 	
 	uint64_t randomU64() 
@@ -25,6 +29,18 @@ namespace Util
 		int bitPos = std::countr_zero(x);
 		x &= x - 1;
 		return bitPos;
+	}
+
+	int bitCount(uint64_t x)
+	{
+		int bitCount = 0;
+		while (x)
+		{
+			bitCount++;
+			popLSB(x);
+		}
+
+		return bitCount;
 	}
 
 	void initKnightMoves()
@@ -90,12 +106,27 @@ namespace Util
 		}
 	}
 
-	void initRelevantOccupancy()
+	void initMagicBitboards()
 	{
 		for (int i = 0; i < 64; i++)
 		{
-			bishopRelevant_[i] = computeBishopMoves(i, 0ULL) & ~FILE_H & ~FILE_A & ~RANK_1 & ~RANK_8;
-			rookRelevant_[i] = computeRookMoves(i, 0ULL) & ~FILE_H & ~FILE_A & ~RANK_1 & ~RANK_8;
+			bishopMagic_[i].relevantMask = computeBishopMoves(i, 0ULL) & ~FILE_H & ~FILE_A & ~RANK_1 & ~RANK_8;
+			rookMagic_[i].relevantMask = computeRookRelevantOccupancy(i);
+
+			bishopMagic_[i].relevantBits = bitCount(bishopMagic_[i].relevantMask);
+			rookMagic_[i].relevantBits = bitCount(rookMagic_[i].relevantMask);
+
+			for (int j = 0; j < (1ULL << bishopMagic_[i].relevantBits); j++)
+			{
+				bishopMagic_[i].occupancyVariations.push_back(j);
+				bishopMoves_[i][j] = computeBishopMoves(i, j);
+			}
+
+			for (int j = 0; j < (1ULL << rookMagic_[i].relevantBits); j++)
+			{
+				rookMagic_[i].occupancyVariations.push_back(j);
+				rookMoves_[i][j] = computeRookMoves(i, j);
+			}
 		}
 	}
 
@@ -163,6 +194,40 @@ namespace Util
 		}
 
 		return moves;
+	}
+
+	uint64_t generateBishopOccupancyFromIndex(int square, int index)
+	{
+		uint64_t startingMask = bishopMagic_[square].relevantMask;
+		uint64_t occupancyMask = 0ULL;
+		
+	}
+	
+	uint64_t generateRookOccupancyFromIndex(int square, int index)
+	{
+		
+	}
+
+	uint64_t computeRookRelevantOccupancy(int square)
+	{
+		uint64_t mask = 0ULL;
+
+		int rank = square / 8;
+		int file = square % 8;
+
+		for (int r = rank + 1; r <= 6; r++)
+			mask |= (1ULL << (r * 8 + file));
+
+		for (int r = rank - 1; r >= 1; r--)
+			mask |= (1ULL << (r * 8 + file));
+
+		for (int f = file + 1; f <= 6; f++)
+			mask |= (1ULL << (rank * 8 + f));
+
+		for (int f = file - 1; f >= 1; f--)
+			mask |= (1ULL << (rank * 8 + f));
+
+		return mask;
 	}
 
 	uint64_t squareMask(int square)
