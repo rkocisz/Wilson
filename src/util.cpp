@@ -116,16 +116,19 @@ namespace Util
 			bishopMagic_[i].relevantBits = bitCount(bishopMagic_[i].relevantMask);
 			rookMagic_[i].relevantBits = bitCount(rookMagic_[i].relevantMask);
 
+			bishopMagic_[i].shift = 64 - bishopMagic_[i].relevantBits;
+			rookMagic_[i].shift = 64 - rookMagic_[i].relevantBits;
+
 			for (int j = 0; j < (1ULL << bishopMagic_[i].relevantBits); j++)
 			{
-				bishopMagic_[i].occupancyVariations.push_back(j);
-				bishopMoves_[i][j] = computeBishopMoves(i, j);
+				bishopMagic_[i].occupancyVariations.push_back(generateBishopOccupancyFromIndex(i, j));
+				bishopMoves_[i][j] = computeBishopMoves(i, bishopMagic_[i].occupancyVariations[j]);
 			}
 
 			for (int j = 0; j < (1ULL << rookMagic_[i].relevantBits); j++)
 			{
-				rookMagic_[i].occupancyVariations.push_back(j);
-				rookMoves_[i][j] = computeRookMoves(i, j);
+				rookMagic_[i].occupancyVariations.push_back(generateRookOccupancyFromIndex(i, j));
+				rookMoves_[i][j] = computeRookMoves(i, rookMagic_[i].occupancyVariations[j]);
 			}
 		}
 	}
@@ -201,13 +204,43 @@ namespace Util
 		uint64_t startingMask = bishopMagic_[square].relevantMask;
 		uint64_t occupancyMask = 0ULL;
 
-		int i = 0;
+		int bitPos = 0;
+		int currentSquare = 0;
 
+		while (startingMask)
+		{
+			currentSquare = popLSB(startingMask);
+
+			if (index & (1 << bitPos))
+			{
+				occupancyMask |= squareMask(currentSquare);
+			}
+
+			bitPos++;
+		}
+		return occupancyMask;
 	}
 	
 	uint64_t generateRookOccupancyFromIndex(int square, int index)
 	{
-		
+		uint64_t startingMask = rookMagic_[square].relevantMask;
+		uint64_t occupancyMask = 0ULL;
+
+		int bitPos = 0;
+		int currentSquare = 0;
+
+		while (startingMask)
+		{
+			currentSquare = popLSB(startingMask);
+
+			if (index & (1 << bitPos))
+			{
+				occupancyMask |= squareMask(currentSquare);
+			}
+
+			bitPos++;
+		}
+		return occupancyMask;
 	}
 
 	uint64_t computeRookRelevantOccupancy(int square)
