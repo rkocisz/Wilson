@@ -17,9 +17,9 @@ namespace Util
 		MagicInfo bishopMagic_[64];
 		MagicInfo rookMagic_[64];
 		uint64_t precomputedBishopMoves_[64][512];
-		uint64_t precomputedRookMoves_[64][1024];
+		uint64_t precomputedRookMoves_[64][4096];
 		uint64_t bishopMoves_[64][512];
-		uint64_t rookMoves_[64][1024];
+		uint64_t rookMoves_[64][4096];
 	}
 	
 	uint64_t randomU64() 
@@ -155,6 +155,8 @@ namespace Util
 					break;
 				}
 			}
+
+			// dodac generowanie tablic!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			
 		}
 	}
@@ -322,16 +324,16 @@ namespace Util
 		int file = square % 8;
 
 		for (int r = rank + 1; r <= 6; r++)
-			mask |= (1ULL << (r * 8 + file));
+			mask |= (squareMask(r * 8 + file));
 
 		for (int r = rank - 1; r >= 1; r--)
-			mask |= (1ULL << (r * 8 + file));
+			mask |= (squareMask(r * 8 + file));
 
 		for (int f = file + 1; f <= 6; f++)
-			mask |= (1ULL << (rank * 8 + f));
+			mask |= (squareMask(rank * 8 + f));
 
 		for (int f = file - 1; f >= 1; f--)
-			mask |= (1ULL << (rank * 8 + f));
+			mask |= (squareMask(rank * 8 + f));
 
 		return mask;
 	}

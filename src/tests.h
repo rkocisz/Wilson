@@ -88,7 +88,14 @@ void perft()
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    if (perftRecursion(1, board) == 20)
+    std::cout << perftRecursion(1, board) << "\n";
+    std::cout << perftRecursion(2, board) << "\n";
+    std::cout << perftRecursion(3, board) << "\n";
+    std::cout << perftRecursion(4, board) << "\n";
+    std::cout << perftRecursion(5, board) << "\n";
+
+
+    /*if (perftRecursion(1, board) == 20)
     {
         std::cout << "Test passed!\n";
     }
@@ -140,7 +147,7 @@ void perft()
     else
     {
         std::cout << "Test NOT passed!\n";
-    }
+    }*/
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;    
