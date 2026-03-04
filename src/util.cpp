@@ -3,6 +3,7 @@
 #include "structs.h"
 
 #include <bit>
+#include <set>
 
 namespace Util
 {
@@ -15,6 +16,8 @@ namespace Util
 		std::mt19937_64 rng(123456);
 		MagicInfo bishopMagic_[64];
 		MagicInfo rookMagic_[64];
+		uint64_t precomputedBishopMoves_[64][512];
+		uint64_t precomputedRookMoves_[64][1024];
 		uint64_t bishopMoves_[64][512];
 		uint64_t rookMoves_[64][1024];
 	}
@@ -122,15 +125,83 @@ namespace Util
 			for (int j = 0; j < (1ULL << bishopMagic_[i].relevantBits); j++)
 			{
 				bishopMagic_[i].occupancyVariations.push_back(generateBishopOccupancyFromIndex(i, j));
-				bishopMoves_[i][j] = computeBishopMoves(i, bishopMagic_[i].occupancyVariations[j]);
+				precomputedBishopMoves_[i][j] = computeBishopMoves(i, bishopMagic_[i].occupancyVariations[j]);
 			}
 
 			for (int j = 0; j < (1ULL << rookMagic_[i].relevantBits); j++)
 			{
 				rookMagic_[i].occupancyVariations.push_back(generateRookOccupancyFromIndex(i, j));
-				rookMoves_[i][j] = computeRookMoves(i, rookMagic_[i].occupancyVariations[j]);
+				precomputedRookMoves_[i][j] = computeRookMoves(i, rookMagic_[i].occupancyVariations[j]);
+			}
+		
+			while (true)
+			{
+				uint64_t randomMagicNum = randomU64() & randomU64() & randomU64();
+
+				if (testMagicNumber(i, randomMagicNum, true))
+				{
+					bishopMagic_[i].magic = randomMagicNum;
+					break;
+				}
+			}
+			
+			while (true)
+			{
+				uint64_t randomMagicNum = randomU64() & randomU64() & randomU64();
+
+				if (testMagicNumber(i, randomMagicNum, false))
+				{
+					rookMagic_[i].magic = randomMagicNum;
+					break;
+				}
+			}
+			
+		}
+	}
+
+	bool testMagicNumber(int square, uint64_t magicNumber, bool isBishop)
+	{
+		int relevantBits = 0;
+		int shift = 0;
+
+		if (isBishop)
+		{
+			relevantBits = bishopMagic_[square].relevantBits;
+			shift = bishopMagic_[square].shift;
+		}
+		else
+		{
+			relevantBits = rookMagic_[square].relevantBits;
+			shift = rookMagic_[square].shift;
+		}
+
+		int tableSize = 1 << relevantBits;
+
+		std::vector<uint64_t> used(tableSize, -1ULL);
+
+		for (int i = 0; i < tableSize; i++)
+		{
+			uint64_t occupancy = isBishop
+				? bishopMagic_[square].occupancyVariations[i]
+				: rookMagic_[square].occupancyVariations[i];
+
+			uint64_t moves = isBishop
+				? precomputedBishopMoves_[square][i]
+				: precomputedRookMoves_[square][i];
+
+			int index = (occupancy * magicNumber) >> shift;
+
+			if (used[index] == -1ULL)
+			{
+				used[index] = moves;
+			}
+			else if (used[index] != moves)
+			{
+				return false;
 			}
 		}
+
+		return true;
 	}
 
 	uint64_t computeBishopMoves(int square, uint64_t occupancy)
@@ -264,6 +335,23 @@ namespace Util
 
 		return mask;
 	}
+
+	uint64_t getBishopMoves(int square, uint64_t occupancy)
+	{
+		occupancy &= bishopMagic_[square].relevantMask;
+		occupancy *= bishopMagic_[square].magic;
+		occupancy >>= bishopMagic_[square].shift;
+		return bishopMoves_[square][occupancy];
+	}
+
+	uint64_t getRookMoves(int square, uint64_t occupancy)
+	{
+		occupancy &= rookMagic_[square].relevantMask;
+		occupancy *= rookMagic_[square].magic;
+		occupancy >>= rookMagic_[square].shift;
+		return rookMoves_[square][occupancy];
+	}
+
 
 	uint64_t squareMask(int square)
 	{

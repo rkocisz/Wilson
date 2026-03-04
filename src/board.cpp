@@ -789,7 +789,7 @@ void Board::generateWhiteBishopMoves()
 	while (bishops)
 	{
 		int startPos = 63 - Util::popLSB(bishops);
-		uint64_t moves = Util::computeBishopMoves(startPos, allPieces_) & ~whitePieces_;
+		uint64_t moves = Util::getBishopMoves(startPos, allPieces_) & ~whitePieces_;
 
 		while (moves)
 		{
@@ -806,7 +806,7 @@ void Board::generateWhiteRookMoves()
 	while (rooks)
 	{
 		int startPos = 63 - Util::popLSB(rooks);
-		uint64_t moves = Util::computeRookMoves(startPos, allPieces_) & ~whitePieces_;
+		uint64_t moves = Util::getRookMoves(startPos, allPieces_) & ~whitePieces_;
 
 		while (moves)
 		{
@@ -822,7 +822,7 @@ void Board::generateWhiteQueenMoves()
 	while (queens)
 	{
 		int startPos = 63 - Util::popLSB(queens);
-		uint64_t moves = (Util::computeBishopMoves(startPos, allPieces_) | Util::computeRookMoves(startPos, allPieces_)) & ~whitePieces_;
+		uint64_t moves = (Util::getBishopMoves(startPos, allPieces_) | Util::getRookMoves(startPos, allPieces_)) & ~whitePieces_;
 		while (moves)
 		{
 			int endPos = 63 - Util::popLSB(moves);
@@ -979,7 +979,7 @@ void Board::generateBlackBishopMoves()
 	while (bishops)
 	{
 		int startPos = 63 - Util::popLSB(bishops);
-		uint64_t moves = Util::computeBishopMoves(startPos, allPieces_) & ~blackPieces_;
+		uint64_t moves = Util::getBishopMoves(startPos, allPieces_) & ~blackPieces_;
 
 		while (moves)
 		{
@@ -996,7 +996,7 @@ void Board::generateBlackRookMoves()
 	while (rooks)
 	{
 		int startPos = 63 - Util::popLSB(rooks);
-		uint64_t moves = Util::computeRookMoves(startPos, allPieces_) & ~blackPieces_;
+		uint64_t moves = Util::getRookMoves(startPos, allPieces_) & ~blackPieces_;
 
 		while (moves)
 		{
@@ -1012,7 +1012,7 @@ void Board::generateBlackQueenMoves()
 	while (queens)
 	{
 		int startPos = 63 - Util::popLSB(queens);
-		uint64_t moves = (Util::computeBishopMoves(startPos, allPieces_) | Util::computeRookMoves(startPos, allPieces_)) & ~blackPieces_;
+		uint64_t moves = (Util::getBishopMoves(startPos, allPieces_) | Util::getRookMoves(startPos, allPieces_)) & ~blackPieces_;
 		while (moves)
 		{
 			int endPos = 63 - Util::popLSB(moves);
