@@ -23,6 +23,7 @@ public:
 	GameState getGamestate();
 	uint64_t getZobristKey();
 	uint64_t getNewlyGeneratedZobristKey();
+	uint64_t getAllPiecesOccupancy();
 
 	void generatePseudoLegalMoves();
 	std::vector<Move> generateLegalMoves();

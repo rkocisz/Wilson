@@ -2,8 +2,10 @@
 #include "common.h"
 #include "structs.h"
 
+#include <iostream>
 #include <bit>
 #include <set>
+#include <bitset>
 
 namespace Util
 {
@@ -44,6 +46,13 @@ namespace Util
 		}
 
 		return bitCount;
+	}
+
+	void initUtil()
+	{
+		initKingMoves();
+		initKnightMoves();
+		initMagicBitboards();
 	}
 
 	void initKnightMoves()
@@ -156,8 +165,23 @@ namespace Util
 				}
 			}
 
-			// dodac generowanie tablic!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			uint64_t index = 0;
+
+			for (int j = 0; j < (1ULL << bishopMagic_[i].relevantBits); j++)
+			{
+				index = bishopMagic_[i].occupancyVariations[j];
+				index *= bishopMagic_[i].magic;
+				index >>= bishopMagic_[i].shift;
+				bishopMoves_[i][index] = precomputedBishopMoves_[i][j];
+			}
 			
+			for (int j = 0; j < (1ULL << rookMagic_[i].relevantBits); j++)
+			{
+				index = rookMagic_[i].occupancyVariations[j];
+				index *= rookMagic_[i].magic;
+				index >>= rookMagic_[i].shift;
+				rookMoves_[i][index] = precomputedRookMoves_[i][j];
+			}
 		}
 	}
 
@@ -363,6 +387,22 @@ namespace Util
 	Color opposite(Color c)
 	{
 		return (c == white) ? black : white;
+	}
+
+	void dobraTrzebaZtestowac()
+	{
+		for (int i = 0; i < bishopMagic_[0].occupancyVariations.size(); i++)
+		{
+			std::bitset<64> bitset(bishopMagic_[0].occupancyVariations[i]);
+			for (int j = 0; j < 64; j++)
+			{
+				std::cout << bitset[j] << " ";
+				if((j + 1) % 8 == 0)
+					std::cout << "\n";
+			}
+
+			std::cout << "\n";
+		}
 	}
 }
 

@@ -23,10 +23,6 @@ Board::Board()
 	initZobrist();
 	zobristKey_ = computeZobrist();
 	positionHistory_.push_back(zobristKey_);
-
-	Util::initKnightMoves();
-	Util::initKingMoves();
-	Util::initMagicBitboards();
 }
 
 void Board::makeMove(Move move)
@@ -532,6 +528,11 @@ uint64_t Board::getZobristKey()
 uint64_t Board::getNewlyGeneratedZobristKey()
 {
 	return computeZobrist();
+}
+
+uint64_t Board::getAllPiecesOccupancy()
+{
+	return allPieces_;
 }
 
 void Board::initZobrist()
