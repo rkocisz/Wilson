@@ -1,3 +1,7 @@
+ray tracing:
 perft took: 10.7823 seconds
 nodes per second: 11512612
 
+magic bitboards + perft z bulk count:
+perft took: 6.13336 seconds
+nodes per second: 20238919

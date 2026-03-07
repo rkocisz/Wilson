@@ -30,8 +30,6 @@ namespace Util
 	uint64_t generateBishopOccupancyFromIndex(int square, int index);
 	uint64_t generateRookOccupancyFromIndex(int square, int index);
 
-	void dobraTrzebaZtestowac();
-
 	extern uint64_t knightMoves_[64];
 	extern uint64_t kingMoves_[64];
 	extern const char* piecesEmotes_[12];

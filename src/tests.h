@@ -72,6 +72,10 @@ long long perftRecursion(int depth, Board& board)
     std::vector<Move> legalMoves = board.generateLegalMoves();
     long long movesCount = 0;
     
+
+    if (depth == 1)
+        return legalMoves.size();
+
     for (Move& move : legalMoves)
     {
         board.makeMove(move);
@@ -88,14 +92,8 @@ void perft()
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::cout << perftRecursion(1, board) << "\n";
-    std::cout << perftRecursion(2, board) << "\n";
-    std::cout << perftRecursion(3, board) << "\n";
-    std::cout << perftRecursion(4, board) << "\n";
-    std::cout << perftRecursion(5, board) << "\n";
 
-
-    /*if (perftRecursion(1, board) == 20)
+    if (perftRecursion(1, board) == 20)
     {
         std::cout << "Test passed!\n";
     }
@@ -147,7 +145,7 @@ void perft()
     else
     {
         std::cout << "Test NOT passed!\n";
-    }*/
+    }
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;    

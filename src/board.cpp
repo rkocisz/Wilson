@@ -18,6 +18,10 @@ Board::Board()
 	for (int i = 0; i < 12; ++i)
 		bitBoards_[i] = 0ULL;
 
+	pseudoLegalMoves_.reserve(256);
+	legalMoves_.reserve(256);
+	
+
 	loadStartPos();
 
 	initZobrist();
@@ -1060,10 +1064,10 @@ bool Board::isSquareAttacked(int square, Color attacker)
 		if (Util::kingMoves_[square] & bitBoards_[PieceType::whiteKing])
 			return true;
 
-		if (Util::computeBishopMoves(square, allPieces_) & (bitBoards_[PieceType::whiteBishop] | bitBoards_[PieceType::whiteQueen]))
+		if (Util::getBishopMoves(square, allPieces_) & (bitBoards_[PieceType::whiteBishop] | bitBoards_[PieceType::whiteQueen]))
 			return true;
 
-		if(Util::computeRookMoves(square, allPieces_) & (bitBoards_[PieceType::whiteRook] | bitBoards_[PieceType::whiteQueen]))
+		if(Util::getRookMoves(square, allPieces_) & (bitBoards_[PieceType::whiteRook] | bitBoards_[PieceType::whiteQueen]))
 			return true;
 
 	}
@@ -1079,10 +1083,10 @@ bool Board::isSquareAttacked(int square, Color attacker)
 		if (Util::kingMoves_[square] & bitBoards_[PieceType::blackKing])
 			return true;
 
-		if (Util::computeBishopMoves(square, allPieces_) & (bitBoards_[PieceType::blackBishop] | bitBoards_[PieceType::blackQueen]))
+		if (Util::getBishopMoves(square, allPieces_) & (bitBoards_[PieceType::blackBishop] | bitBoards_[PieceType::blackQueen]))
 			return true;
 
-		if (Util::computeRookMoves(square, allPieces_) & (bitBoards_[PieceType::blackRook] | bitBoards_[PieceType::blackQueen]))
+		if (Util::getRookMoves(square, allPieces_) & (bitBoards_[PieceType::blackRook] | bitBoards_[PieceType::blackQueen]))
 			return true;
 	}
 

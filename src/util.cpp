@@ -306,7 +306,7 @@ namespace Util
 
 		while (startingMask)
 		{
-			currentSquare = popLSB(startingMask);
+			currentSquare = 63 - popLSB(startingMask);
 
 			if (index & (1 << bitPos))
 			{
@@ -328,7 +328,7 @@ namespace Util
 
 		while (startingMask)
 		{
-			currentSquare = popLSB(startingMask);
+			currentSquare = 63 - popLSB(startingMask);
 
 			if (index & (1 << bitPos))
 			{
@@ -387,22 +387,6 @@ namespace Util
 	Color opposite(Color c)
 	{
 		return (c == white) ? black : white;
-	}
-
-	void dobraTrzebaZtestowac()
-	{
-		for (int i = 0; i < bishopMagic_[0].occupancyVariations.size(); i++)
-		{
-			std::bitset<64> bitset(bishopMagic_[0].occupancyVariations[i]);
-			for (int j = 0; j < 64; j++)
-			{
-				std::cout << bitset[j] << " ";
-				if((j + 1) % 8 == 0)
-					std::cout << "\n";
-			}
-
-			std::cout << "\n";
-		}
 	}
 }
 
