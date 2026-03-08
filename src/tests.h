@@ -70,7 +70,7 @@ long long perftRecursion(int depth, Board& board)
         return 1;
     }
 
-    std::vector<Move> legalMoves = MoveGen::generateLegalMoves(board);
+    std::vector<Move> legalMoves = MoveGen::generateLegalMoves(&board);
     long long movesCount = 0;
     
 

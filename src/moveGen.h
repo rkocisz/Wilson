@@ -5,7 +5,7 @@
 
 namespace MoveGen
 {
-	std::vector<Move> generateLegalMoves(Board& board);
+	std::vector<Move> generateLegalMoves(Board* board);
 }
 
 #endif 
