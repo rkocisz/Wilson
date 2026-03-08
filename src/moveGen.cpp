@@ -3,8 +3,10 @@
 #include "structs.h"
 #include "util.h"
 #include "moveGenUtil.h"
+#include "common.h"
 
 #include <vector>
+#include <bit>
 
 
 namespace MoveGen
@@ -14,31 +16,17 @@ namespace MoveGen
 		std::vector<Move> pseudoLegalMoves_;
 		std::vector<Move> legalMoves_;
 
-		void generatePseudoLegalMoves()
-		{
-			pseudoLegalMoves_.clear();
+		Board board_;
+		
+		std::array<PieceType, 64> boardArray_;
+		std::array<uint64_t, 12> bitBoards_;
+		uint64_t whitePieces_;
+		uint64_t blackPieces_;
+		uint64_t allPieces_;
 
-			if (sideToMove_ == Color::white)
-			{
-				generateWhitePawnMoves();
-				generateWhiteKnightMoves();
-				generateWhiteBishopMoves();
-				generateWhiteRookMoves();
-				generateWhiteQueenMoves();
-				generateWhiteKingMoves();
-			}
-			else
-			{
-				generateBlackPawnMoves();
-				generateBlackKnightMoves();
-				generateBlackBishopMoves();
-				generateBlackRookMoves();
-				generateBlackQueenMoves();
-				generateBlackKingMoves();
-			}
-			return;
-		}
-
+		uint8_t castlingRights_;
+		int enPassantSquare_;
+		Color sideToMove_;
 
 
 		void generateWhitePawnMoves()
@@ -87,7 +75,7 @@ namespace MoveGen
 				int endPos = 63 - Util::popLSB(normalLeft);
 				int startPos = endPos + 9;
 
-				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], PieceType::empty, MoveType::normal);
+				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whitePawn, boardArray_[endPos], PieceType::empty, MoveType::normal);
 			}
 
 			while (normalRight)
@@ -95,7 +83,7 @@ namespace MoveGen
 				int endPos = 63 - Util::popLSB(normalRight);
 				int startPos = endPos + 7;
 
-				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], PieceType::empty, MoveType::normal);
+				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whitePawn, boardArray_[endPos], PieceType::empty, MoveType::normal);
 			}
 
 			while (promoLeft)
@@ -105,7 +93,7 @@ namespace MoveGen
 
 				for (int i = 1; i < 5; i++)
 				{
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whitePawn, boardArray_[endPos], static_cast<PieceType>(i), MoveType::normal);
 				}
 			}
 
@@ -115,7 +103,7 @@ namespace MoveGen
 				int startPos = endPos + 7;
 				for (int i = 1; i < 5; i++)
 				{
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whitePawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whitePawn, boardArray_[endPos], static_cast<PieceType>(i), MoveType::normal);
 				}
 			}
 
@@ -151,12 +139,12 @@ namespace MoveGen
 			while (knights)
 			{
 				int startPos = 63 - Util::popLSB(knights);
-				uint64_t attacks = Util::knightMoves_[startPos] & ~whitePieces_;
+				uint64_t attacks = MoveGenUtil::knightMoves_[startPos] & ~whitePieces_;
 
 				while (attacks)
 				{
 					int endPos = 63 - Util::popLSB(attacks);
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whiteKnight, board_[endPos], PieceType::empty, MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whiteKnight, boardArray_[endPos], PieceType::empty, MoveType::normal);
 				}
 			}
 		}
@@ -168,12 +156,12 @@ namespace MoveGen
 			while (bishops)
 			{
 				int startPos = 63 - Util::popLSB(bishops);
-				uint64_t moves = Util::getBishopMoves(startPos, allPieces_) & ~whitePieces_;
+				uint64_t moves = MoveGenUtil::getBishopMoves(startPos, allPieces_) & ~whitePieces_;
 
 				while (moves)
 				{
 					int endPos = 63 - Util::popLSB(moves);
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whiteBishop, board_[endPos], PieceType::empty, MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whiteBishop, boardArray_[endPos], PieceType::empty, MoveType::normal);
 				}
 			}
 		}
@@ -185,12 +173,12 @@ namespace MoveGen
 			while (rooks)
 			{
 				int startPos = 63 - Util::popLSB(rooks);
-				uint64_t moves = Util::getRookMoves(startPos, allPieces_) & ~whitePieces_;
+				uint64_t moves = MoveGenUtil::getRookMoves(startPos, allPieces_) & ~whitePieces_;
 
 				while (moves)
 				{
 					int endPos = 63 - Util::popLSB(moves);
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whiteRook, board_[endPos], PieceType::empty, MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whiteRook, boardArray_[endPos], PieceType::empty, MoveType::normal);
 				}
 			}
 		}
@@ -201,11 +189,11 @@ namespace MoveGen
 			while (queens)
 			{
 				int startPos = 63 - Util::popLSB(queens);
-				uint64_t moves = (Util::getBishopMoves(startPos, allPieces_) | Util::getRookMoves(startPos, allPieces_)) & ~whitePieces_;
+				uint64_t moves = (MoveGenUtil::getBishopMoves(startPos, allPieces_) | MoveGenUtil::getRookMoves(startPos, allPieces_)) & ~whitePieces_;
 				while (moves)
 				{
 					int endPos = 63 - Util::popLSB(moves);
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whiteQueen, board_[endPos], PieceType::empty, MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whiteQueen, boardArray_[endPos], PieceType::empty, MoveType::normal);
 				}
 			}
 		}
@@ -213,12 +201,12 @@ namespace MoveGen
 		void generateWhiteKingMoves()
 		{
 			int startPos = 63 - std::countr_zero(bitBoards_[PieceType::whiteKing]);
-			uint64_t kingMoves = Util::kingMoves_[startPos] & ~whitePieces_;
+			uint64_t kingMoves = MoveGenUtil::kingMoves_[startPos] & ~whitePieces_;
 
 			while (kingMoves)
 			{
 				int endPos = 63 - Util::popLSB(kingMoves);
-				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whiteKing, board_[endPos], PieceType::empty, MoveType::normal);
+				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::whiteKing, boardArray_[endPos], PieceType::empty, MoveType::normal);
 			}
 
 			if (castlingRights_ & CastlingRights::whiteKingSide && !(allPieces_ & (Util::squareMask(61) | Util::squareMask(62))))
@@ -277,7 +265,7 @@ namespace MoveGen
 				int endPos = 63 - Util::popLSB(normalLeft);
 				int startPos = endPos - 7;
 
-				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackPawn, board_[endPos], PieceType::empty, MoveType::normal);
+				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackPawn, boardArray_[endPos], PieceType::empty, MoveType::normal);
 			}
 
 			while (normalRight)
@@ -285,7 +273,7 @@ namespace MoveGen
 				int endPos = 63 - Util::popLSB(normalRight);
 				int startPos = endPos - 9;
 
-				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackPawn, board_[endPos], PieceType::empty, MoveType::normal);
+				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackPawn, boardArray_[endPos], PieceType::empty, MoveType::normal);
 			}
 
 			while (promoLeft)
@@ -295,7 +283,7 @@ namespace MoveGen
 
 				for (int i = 7; i < 11; i++)
 				{
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackPawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackPawn, boardArray_[endPos], static_cast<PieceType>(i), MoveType::normal);
 				}
 			}
 
@@ -305,7 +293,7 @@ namespace MoveGen
 				int startPos = endPos - 9;
 				for (int i = 7; i < 11; i++)
 				{
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackPawn, board_[endPos], static_cast<PieceType>(i), MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackPawn, boardArray_[endPos], static_cast<PieceType>(i), MoveType::normal);
 				}
 			}
 
@@ -341,12 +329,12 @@ namespace MoveGen
 			while (knights)
 			{
 				int startPos = 63 - Util::popLSB(knights);
-				uint64_t attacks = Util::knightMoves_[startPos] & ~blackPieces_;
+				uint64_t attacks = MoveGenUtil::knightMoves_[startPos] & ~blackPieces_;
 
 				while (attacks)
 				{
 					int endPos = 63 - Util::popLSB(attacks);
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackKnight, board_[endPos], PieceType::empty, MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackKnight, boardArray_[endPos], PieceType::empty, MoveType::normal);
 				}
 			}
 		}
@@ -358,12 +346,12 @@ namespace MoveGen
 			while (bishops)
 			{
 				int startPos = 63 - Util::popLSB(bishops);
-				uint64_t moves = Util::getBishopMoves(startPos, allPieces_) & ~blackPieces_;
+				uint64_t moves = MoveGenUtil::getBishopMoves(startPos, allPieces_) & ~blackPieces_;
 
 				while (moves)
 				{
 					int endPos = 63 - Util::popLSB(moves);
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackBishop, board_[endPos], PieceType::empty, MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackBishop, boardArray_[endPos], PieceType::empty, MoveType::normal);
 				}
 			}
 		}
@@ -375,12 +363,12 @@ namespace MoveGen
 			while (rooks)
 			{
 				int startPos = 63 - Util::popLSB(rooks);
-				uint64_t moves = Util::getRookMoves(startPos, allPieces_) & ~blackPieces_;
+				uint64_t moves = MoveGenUtil::getRookMoves(startPos, allPieces_) & ~blackPieces_;
 
 				while (moves)
 				{
 					int endPos = 63 - Util::popLSB(moves);
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackRook, board_[endPos], PieceType::empty, MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackRook, boardArray_[endPos], PieceType::empty, MoveType::normal);
 				}
 			}
 		}
@@ -391,11 +379,11 @@ namespace MoveGen
 			while (queens)
 			{
 				int startPos = 63 - Util::popLSB(queens);
-				uint64_t moves = (Util::getBishopMoves(startPos, allPieces_) | Util::getRookMoves(startPos, allPieces_)) & ~blackPieces_;
+				uint64_t moves = (MoveGenUtil::getBishopMoves(startPos, allPieces_) | MoveGenUtil::getRookMoves(startPos, allPieces_)) & ~blackPieces_;
 				while (moves)
 				{
 					int endPos = 63 - Util::popLSB(moves);
-					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackQueen, board_[endPos], PieceType::empty, MoveType::normal);
+					pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackQueen, boardArray_[endPos], PieceType::empty, MoveType::normal);
 				}
 			}
 		}
@@ -403,12 +391,12 @@ namespace MoveGen
 		void generateBlackKingMoves()
 		{
 			int startPos = 63 - std::countr_zero(bitBoards_[PieceType::blackKing]);
-			uint64_t kingMoves = Util::kingMoves_[startPos] & ~blackPieces_;
+			uint64_t kingMoves = MoveGenUtil::kingMoves_[startPos] & ~blackPieces_;
 
 			while (kingMoves)
 			{
 				int endPos = 63 - Util::popLSB(kingMoves);
-				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackKing, board_[endPos], PieceType::empty, MoveType::normal);
+				pseudoLegalMoves_.emplace_back(startPos, endPos, PieceType::blackKing, boardArray_[endPos], PieceType::empty, MoveType::normal);
 			}
 
 			if (castlingRights_ & CastlingRights::blackKingSide && !(allPieces_ & (Util::squareMask(5) | Util::squareMask(6))))
@@ -431,17 +419,17 @@ namespace MoveGen
 				if (attackers & bitBoards_[PieceType::whitePawn])
 					return true;
 
-				if (Util::knightMoves_[square] & bitBoards_[PieceType::whiteKnight])
+				if (MoveGenUtil::knightMoves_[square] & bitBoards_[PieceType::whiteKnight])
 					return true;
 
 
-				if (Util::kingMoves_[square] & bitBoards_[PieceType::whiteKing])
+				if (MoveGenUtil::kingMoves_[square] & bitBoards_[PieceType::whiteKing])
 					return true;
 
-				if (Util::getBishopMoves(square, allPieces_) & (bitBoards_[PieceType::whiteBishop] | bitBoards_[PieceType::whiteQueen]))
+				if (MoveGenUtil::getBishopMoves(square, allPieces_) & (bitBoards_[PieceType::whiteBishop] | bitBoards_[PieceType::whiteQueen]))
 					return true;
 
-				if (Util::getRookMoves(square, allPieces_) & (bitBoards_[PieceType::whiteRook] | bitBoards_[PieceType::whiteQueen]))
+				if (MoveGenUtil::getRookMoves(square, allPieces_) & (bitBoards_[PieceType::whiteRook] | bitBoards_[PieceType::whiteQueen]))
 					return true;
 
 			}
@@ -451,25 +439,62 @@ namespace MoveGen
 				if (attackers & bitBoards_[PieceType::blackPawn])
 					return true;
 
-				if (Util::knightMoves_[square] & bitBoards_[PieceType::blackKnight])
+				if (MoveGenUtil::knightMoves_[square] & bitBoards_[PieceType::blackKnight])
 					return true;
 
-				if (Util::kingMoves_[square] & bitBoards_[PieceType::blackKing])
+				if (MoveGenUtil::kingMoves_[square] & bitBoards_[PieceType::blackKing])
 					return true;
 
-				if (Util::getBishopMoves(square, allPieces_) & (bitBoards_[PieceType::blackBishop] | bitBoards_[PieceType::blackQueen]))
+				if (MoveGenUtil::getBishopMoves(square, allPieces_) & (bitBoards_[PieceType::blackBishop] | bitBoards_[PieceType::blackQueen]))
 					return true;
 
-				if (Util::getRookMoves(square, allPieces_) & (bitBoards_[PieceType::blackRook] | bitBoards_[PieceType::blackQueen]))
+				if (MoveGenUtil::getRookMoves(square, allPieces_) & (bitBoards_[PieceType::blackRook] | bitBoards_[PieceType::blackQueen]))
 					return true;
 			}
 
 			return false;
 		}
+
+		void generatePseudoLegalMoves()
+		{
+			pseudoLegalMoves_.clear();
+
+			if (sideToMove_ == Color::white)
+			{
+				generateWhitePawnMoves();
+				generateWhiteKnightMoves();
+				generateWhiteBishopMoves();
+				generateWhiteRookMoves();
+				generateWhiteQueenMoves();
+				generateWhiteKingMoves();
+			}
+			else
+			{
+				generateBlackPawnMoves();
+				generateBlackKnightMoves();
+				generateBlackBishopMoves();
+				generateBlackRookMoves();
+				generateBlackQueenMoves();
+				generateBlackKingMoves();
+			}
+			return;
+		}
 	}
 
 	std::vector<Move> generateLegalMoves(Board& board)
 	{
+		board_ = board;
+
+		boardArray_ = board_.getBoard();
+		bitBoards_ = board_.getBitBoards();
+		whitePieces_ = board_.getWhitePiecesOccupancy();
+		blackPieces_ = board_.getBlackPiecesOccupancy();
+		allPieces_ = board_.getAllPiecesOccupancy();
+
+		castlingRights_ = board_.getCastlingRights();
+		enPassantSquare_ = board_.getEnPassantSquare();
+		sideToMove_ = board_.getSideToMove();
+
 		legalMoves_.clear();
 		generatePseudoLegalMoves();
 
@@ -478,7 +503,7 @@ namespace MoveGen
 
 		for (const Move& move : pseudoLegalMoves_)
 		{
-			makeMove(move);
+			board_.makeMove(move);
 
 			if (moving == Color::white)
 			{
@@ -496,7 +521,7 @@ namespace MoveGen
 				legalMoves_.push_back(move);
 			}
 
-			unmakeMove(move);
+			board_.unmakeMove(move);
 
 		}
 		return legalMoves_;

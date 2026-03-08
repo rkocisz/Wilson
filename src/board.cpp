@@ -18,9 +18,6 @@ Board::Board()
 	for (int i = 0; i < 12; ++i)
 		bitBoards_[i] = 0ULL;
 
-	pseudoLegalMoves_.reserve(256);
-	legalMoves_.reserve(256);
-	
 
 	loadStartPos();
 
@@ -519,24 +516,59 @@ void Board::draw()
 	std::cout << "\n" << std::bitset<64>(whitePieces_) << "\n" << std::bitset<64>(blackPieces_) << "\n" << std::bitset<64>(allPieces_) << "\n";
 }
 
-GameState Board::getGamestate()
+const GameState& Board::getGamestate()
 {
 	return gameState_;
 }
 
-uint64_t Board::getZobristKey()
+const uint64_t& Board::getZobristKey()
 {
 	return zobristKey_;
 }
 
-uint64_t Board::getNewlyGeneratedZobristKey()
+const uint64_t& Board::getNewlyGeneratedZobristKey()
 {
 	return computeZobrist();
 }
 
-uint64_t Board::getAllPiecesOccupancy()
+const uint64_t& Board::getAllPiecesOccupancy()
 {
 	return allPieces_;
+}
+
+const uint64_t& Board::getWhitePiecesOccupancy()
+{
+	return whitePieces_;
+}
+
+const uint64_t& Board::getBlackPiecesOccupancy()
+{
+	return blackPieces_;
+}
+
+const std::array<uint64_t, 12>& Board::getBitBoards()
+{
+	return bitBoards_;
+}
+
+const Color& Board::getSideToMove()
+{
+	return sideToMove_;
+}
+
+const std::array<PieceType, 64>& Board::getBoard()
+{
+	return board_;
+}
+
+const uint8_t& Board::getCastlingRights()
+{
+	return castlingRights_;
+}
+
+const int& Board::getEnPassantSquare()
+{
+	return enPassantSquare_;
 }
 
 void Board::initZobrist()

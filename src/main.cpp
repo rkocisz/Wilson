@@ -5,12 +5,13 @@
 #include "tests.h"
 #include "board.h"
 #include "util.h"
+#include "moveGenUtil.h"
 
 int main()
 {
     SetConsoleOutputCP(CP_UTF8);
 
-    Util::initUtil();
+    MoveGenUtil::init();
 
     testMoveAndUnmakeMove();
     testZobristKeyGeneration();

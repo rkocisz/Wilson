@@ -3,6 +3,7 @@
 
 #include "enums.h"
 #include <cinttypes>
+#include <vector>
 
 struct Move
 {

@@ -3,6 +3,7 @@
 
 #include "board.h"
 #include "enums.h"
+#include "moveGen.h"
 #include <cassert>
 #include <iostream>
 #include <cinttypes>
@@ -69,7 +70,7 @@ long long perftRecursion(int depth, Board& board)
         return 1;
     }
 
-    std::vector<Move> legalMoves = board.generateLegalMoves();
+    std::vector<Move> legalMoves = MoveGen::generateLegalMoves(board);
     long long movesCount = 0;
     
 

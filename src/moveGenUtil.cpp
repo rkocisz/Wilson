@@ -79,6 +79,117 @@ namespace MoveGenUtil
 			}
 		}
 
+		uint64_t computeRookRelevantOccupancy(int square)
+		{
+			uint64_t mask = 0ULL;
+
+			int rank = square / 8;
+			int file = square % 8;
+
+			for (int r = rank + 1; r <= 6; r++)
+				mask |= (Util::squareMask(r * 8 + file));
+
+			for (int r = rank - 1; r >= 1; r--)
+				mask |= (Util::squareMask(r * 8 + file));
+
+			for (int f = file + 1; f <= 6; f++)
+				mask |= (Util::squareMask(rank * 8 + f));
+
+			for (int f = file - 1; f >= 1; f--)
+				mask |= (Util::squareMask(rank * 8 + f));
+
+			return mask;
+		}
+
+		uint64_t generateBishopOccupancyFromIndex(int square, int index)
+		{
+			uint64_t startingMask = bishopMagic_[square].relevantMask;
+			uint64_t occupancyMask = 0ULL;
+
+			int bitPos = 0;
+			int currentSquare = 0;
+
+			while (startingMask)
+			{
+				currentSquare = 63 - Util::popLSB(startingMask);
+
+				if (index & (1 << bitPos))
+				{
+					occupancyMask |= Util::squareMask(currentSquare);
+				}
+
+				bitPos++;
+			}
+			return occupancyMask;
+		}
+
+		uint64_t generateRookOccupancyFromIndex(int square, int index)
+		{
+			uint64_t startingMask = rookMagic_[square].relevantMask;
+			uint64_t occupancyMask = 0ULL;
+
+			int bitPos = 0;
+			int currentSquare = 0;
+
+			while (startingMask)
+			{
+				currentSquare = 63 - Util::popLSB(startingMask);
+
+				if (index & (1 << bitPos))
+				{
+					occupancyMask |= Util::squareMask(currentSquare);
+				}
+
+				bitPos++;
+			}
+			return occupancyMask;
+		}
+
+		bool testMagicNumber(int square, uint64_t magicNumber, bool isBishop)
+		{
+			int relevantBits = 0;
+			int shift = 0;
+
+			if (isBishop)
+			{
+				relevantBits = bishopMagic_[square].relevantBits;
+				shift = bishopMagic_[square].shift;
+			}
+			else
+			{
+				relevantBits = rookMagic_[square].relevantBits;
+				shift = rookMagic_[square].shift;
+			}
+
+			int tableSize = 1 << relevantBits;
+
+			std::vector<uint64_t> used(tableSize, -1ULL);
+
+			for (int i = 0; i < tableSize; i++)
+			{
+				uint64_t occupancy = isBishop
+					? bishopMagic_[square].occupancyVariations[i]
+					: rookMagic_[square].occupancyVariations[i];
+
+				uint64_t moves = isBishop
+					? precomputedBishopMoves_[square][i]
+					: precomputedRookMoves_[square][i];
+
+				int index = (occupancy * magicNumber) >> shift;
+
+				if (used[index] == -1ULL)
+				{
+					used[index] = moves;
+				}
+				else if (used[index] != moves)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		void initMagicBitboards()
 		{
 			for (int i = 0; i < 64; i++)
@@ -145,120 +256,9 @@ namespace MoveGenUtil
 				}
 			}
 		}
-
-		bool testMagicNumber(int square, uint64_t magicNumber, bool isBishop)
-		{
-			int relevantBits = 0;
-			int shift = 0;
-
-			if (isBishop)
-			{
-				relevantBits = bishopMagic_[square].relevantBits;
-				shift = bishopMagic_[square].shift;
-			}
-			else
-			{
-				relevantBits = rookMagic_[square].relevantBits;
-				shift = rookMagic_[square].shift;
-			}
-
-			int tableSize = 1 << relevantBits;
-
-			std::vector<uint64_t> used(tableSize, -1ULL);
-
-			for (int i = 0; i < tableSize; i++)
-			{
-				uint64_t occupancy = isBishop
-					? bishopMagic_[square].occupancyVariations[i]
-					: rookMagic_[square].occupancyVariations[i];
-
-				uint64_t moves = isBishop
-					? precomputedBishopMoves_[square][i]
-					: precomputedRookMoves_[square][i];
-
-				int index = (occupancy * magicNumber) >> shift;
-
-				if (used[index] == -1ULL)
-				{
-					used[index] = moves;
-				}
-				else if (used[index] != moves)
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		uint64_t generateBishopOccupancyFromIndex(int square, int index)
-		{
-			uint64_t startingMask = bishopMagic_[square].relevantMask;
-			uint64_t occupancyMask = 0ULL;
-
-			int bitPos = 0;
-			int currentSquare = 0;
-
-			while (startingMask)
-			{
-				currentSquare = 63 - Util::popLSB(startingMask);
-
-				if (index & (1 << bitPos))
-				{
-					occupancyMask |= Util::squareMask(currentSquare);
-				}
-
-				bitPos++;
-			}
-			return occupancyMask;
-		}
-
-		uint64_t generateRookOccupancyFromIndex(int square, int index)
-		{
-			uint64_t startingMask = rookMagic_[square].relevantMask;
-			uint64_t occupancyMask = 0ULL;
-
-			int bitPos = 0;
-			int currentSquare = 0;
-
-			while (startingMask)
-			{
-				currentSquare = 63 - Util::popLSB(startingMask);
-
-				if (index & (1 << bitPos))
-				{
-					occupancyMask |= Util::squareMask(currentSquare);
-				}
-
-				bitPos++;
-			}
-			return occupancyMask;
-		}
-
-		uint64_t computeRookRelevantOccupancy(int square)
-		{
-			uint64_t mask = 0ULL;
-
-			int rank = square / 8;
-			int file = square % 8;
-
-			for (int r = rank + 1; r <= 6; r++)
-				mask |= (Util::squareMask(r * 8 + file));
-
-			for (int r = rank - 1; r >= 1; r--)
-				mask |= (Util::squareMask(r * 8 + file));
-
-			for (int f = file + 1; f <= 6; f++)
-				mask |= (Util::squareMask(rank * 8 + f));
-
-			for (int f = file - 1; f >= 1; f--)
-				mask |= (Util::squareMask(rank * 8 + f));
-
-			return mask;
-		}
 	}
 
-	void initMoveGenUtil()
+	void init()
 	{
 		initKingMoves();
 		initKnightMoves();

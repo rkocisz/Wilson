@@ -6,7 +6,7 @@
 
 namespace MoveGenUtil
 {
-	void initMoveGenUtil();
+	void init();
 
 	uint64_t computeBishopMoves(int square, uint64_t occupancy);
 	uint64_t computeRookMoves(int square, uint64_t occupancy);
