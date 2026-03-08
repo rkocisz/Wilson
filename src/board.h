@@ -24,24 +24,21 @@ public:
 	uint64_t getZobristKey();
 	uint64_t getNewlyGeneratedZobristKey();
 	uint64_t getAllPiecesOccupancy();
-
-	void generatePseudoLegalMoves();
-	std::vector<Move> generateLegalMoves();
+	uint64_t getWhitePiecesOccupancy();
+	uint64_t getBlackPiecesOccupancy();
+	
+	
 
 private:
 	void initZobrist();
 	uint64_t computeZobrist();
 	bool isPositionRepeatedThrice();
-	bool isSquareAttacked(int square, Color attacker);
 
 	PieceType board_[64];
 	uint64_t bitBoards_[12];
 	uint64_t whitePieces_;
 	uint64_t blackPieces_;
 	uint64_t allPieces_;
-
-	std::vector<Move> pseudoLegalMoves_;
-	std::vector<Move> legalMoves_;
 
 	uint8_t castlingRights_;
 	int enPassantSquare_;
@@ -53,24 +50,6 @@ private:
 
 	GameState gameState_;
 
-	//Move generation
-	
-
-	void generateWhitePawnMoves();
-	void generateWhiteKnightMoves();
-	void generateWhiteBishopMoves();
-	void generateWhiteRookMoves();
-	void generateWhiteQueenMoves();
-	void generateWhiteKingMoves();
-
-	void generateBlackPawnMoves();
-	void generateBlackKnightMoves();
-	void generateBlackBishopMoves();
-	void generateBlackRookMoves();
-	void generateBlackQueenMoves();
-	void generateBlackKingMoves();
-
-	
 
 	//Zobrist
 	uint64_t zobristPiece_[12][64];
