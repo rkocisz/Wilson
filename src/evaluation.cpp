@@ -12,7 +12,69 @@ namespace Eval
 		int mgValue_[6] = {20000, 1025, 477, 365, 337, 82};
 		int egValue_[6] = {20000, 936, 512, 297, 281, 94};
 
-		int gamePhaseValue[6] = {0, 4, 2, 1, 1, 0	};
+		int gamePhaseValue[6] = {0, 4, 2, 1, 1, 0};
+
+		int evaluateMaterial(const Board& board)
+		{
+			int mgVal = 0;
+			int egVal = 0;
+			int gamePhase = 0;
+
+			for (int i = 0; i < 6; i++)
+			{
+				uint64_t pieceSquares = board.bitBoards_[i];
+
+				while (pieceSquares)
+				{
+					int pos = Util::popLSB(pieceSquares);
+
+					mgVal += mgTable_[i][pos];
+					egVal += egTable_[i][pos];
+
+					gamePhase += gamePhaseValue[i];
+				}
+
+				int blackPieceIndex = i + 6;
+				pieceSquares = board.bitBoards_[blackPieceIndex];
+
+				while (pieceSquares)
+				{
+					int pos = Util::popLSB(pieceSquares);
+
+					mgVal -= mgTable_[blackPieceIndex][pos];
+					egVal -= egTable_[blackPieceIndex][pos];
+
+					gamePhase += gamePhaseValue[i];
+				}
+			}
+
+			if (gamePhase > 24)
+				gamePhase = 24;
+
+			return (mgVal * gamePhase + egVal * (24 - gamePhase)) / 24;
+		}
+
+		int evaluatePawnStructure(const Board& board)
+		{
+			int eval = 0;
+
+			for (int i = 0; i < 8; i++)
+			{
+				int whitePawnCount = Util::bitCount(board.bitBoards_[PieceType::whitePawn] & fileMasks[i]);
+				int blackPawnCount = Util::bitCount(board.bitBoards_[PieceType::whitePawn] & fileMasks[i]);
+
+				if (whitePawnCount > 1)
+				{
+					eval -= doubledPawnPentalty * whitePawnCount - 1;
+				}
+				if (blackPawnCount > 1)
+				{
+					eval += doubledPawnPentalty * whitePawnCount - 1;
+				}
+			}
+
+			return eval;
+		}
 	}
 
 	void init()
@@ -26,7 +88,7 @@ namespace Eval
 			mgTable_[4][i] = mgValue_[4] + mgKnightTable[i];
 			mgTable_[5][i] = mgValue_[5] + mgPawnTable[i];
 
-			mgTable_[6][i] = mgValue_[0] + mgKingTable[i ^ 56];
+			mgTable_[6][i] = mgValue_[0] + mgKingTable[i ^ 56]; ///////////////////////////////////////
 			mgTable_[7][i] = mgValue_[1] + mgQueenTable[i ^ 56];
 			mgTable_[8][i] = mgValue_[2] + mgRookTable[i ^ 56];
 			mgTable_[9][i] = mgValue_[3] + mgBishopTable[i ^ 56];
@@ -51,43 +113,10 @@ namespace Eval
 
 	int evaluate(const Board& board)
 	{
-		int mgVal = 0;
-		int egVal = 0;
-		int gamePhase = 0;
+		int eval = 0;
 
+		eval += evaluateMaterial(board);
 
-		for (int i = 0; i < 6; i++)
-		{
-			uint64_t pieceSquares = board.bitBoards_[i];
-
-			while (pieceSquares)
-			{
-				int pos = Util::popLSB(pieceSquares);
-
-				mgVal += mgTable_[i][pos];
-				egVal += egTable_[i][pos];
-
-				gamePhase += gamePhaseValue[i];
-			}
-
-			int blackPieceIndex = i + 6;
-			pieceSquares = board.bitBoards_[blackPieceIndex];
-
-			while (pieceSquares)
-			{
-				int pos = Util::popLSB(pieceSquares);
-
-				mgVal -= mgTable_[blackPieceIndex][pos];
-				egVal -= egTable_[blackPieceIndex][pos];
-
-				gamePhase += gamePhaseValue[i];
-			}
-		}
-
-		if(gamePhase > 24)
-			gamePhase = 24;
-
-		int eval = (mgVal * gamePhase + egVal * (24 - gamePhase)) /24;
 
 		return (board.sideToMove_ == Color::white) ? eval : -eval;
 	}

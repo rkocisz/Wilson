@@ -3,15 +3,27 @@
 
 #include <cstdint>
 
-constexpr uint64_t FILE_A = 0x8080808080808080ULL;
 constexpr uint64_t FILE_H = 0x0101010101010101ULL;
-constexpr uint64_t RANK_8 = 0xFF00000000000000ULL;
+constexpr uint64_t FILE_G = 0x0202020202020202ULL;
+constexpr uint64_t FILE_F = 0x0404040404040404ULL;
+constexpr uint64_t FILE_E = 0x0808080808080808ULL;
+constexpr uint64_t FILE_D = 0x1010101010101010ULL;
+constexpr uint64_t FILE_C = 0x2020202020202020ULL;
+constexpr uint64_t FILE_B = 0x4040404040404040ULL;
+constexpr uint64_t FILE_A = 0x8080808080808080ULL;
 constexpr uint64_t RANK_3 = 0x0000000000FF0000ULL;
 constexpr uint64_t RANK_1 = 0x00000000000000FFULL;
 constexpr uint64_t RANK_6 = 0x0000FF0000000000ULL;
 
-int mg_value[6] = { 82, 337, 365, 477, 1025,  0 };
-int eg_value[6] = { 94, 281, 297, 512,  936,  0 };
+constexpr uint64_t fileMasks[8] = {FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H};
+constexpr uint64_t adjacentFileMasks[8] = {FILE_B , FILE_A | FILE_C, FILE_B | FILE_D, FILE_C | FILE_E, FILE_D | FILE_F, FILE_E | FILE_G, FILE_F | FILE_H, FILE_G};
+
+//eval
+constexpr int mg_value[6] = { 82, 337, 365, 477, 1025,  0 };
+constexpr int eg_value[6] = { 94, 281, 297, 512,  936,  0 };
+
+constexpr int doubledPawnPentalty = 12;
+constexpr int isolatedPawnPentalty = 15;
 
 constexpr int mgPawnTable[64] = {
       0,   0,   0,   0,   0,   0,  0,   0,
