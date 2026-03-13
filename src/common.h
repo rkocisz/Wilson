@@ -24,6 +24,8 @@ constexpr int eg_value[6] = { 94, 281, 297, 512,  936,  0 };
 
 constexpr int doubledPawnPentalty = 12;
 constexpr int isolatedPawnPentalty = 15;
+constexpr int mgPassedPawnBonus = 30;
+constexpr int egPassedPawnBonus = 60;
 
 constexpr int mgPawnTable[64] = {
       0,   0,   0,   0,   0,   0,  0,   0,

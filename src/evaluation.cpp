@@ -14,6 +14,9 @@ namespace Eval
 
 		int gamePhaseValue[6] = {0, 4, 2, 1, 1, 0};
 
+		uint64_t whitePassedPawnMask[64];
+		uint64_t blackPassedPawnMask[64];
+
 		int evaluateMaterial(const Board& board)
 		{
 			int mgVal = 0;
@@ -58,20 +61,35 @@ namespace Eval
 		{
 			int eval = 0;
 
-			for (int i = 0; i < 8; i++)
-			{
-				int whitePawnCount = Util::bitCount(board.bitBoards_[PieceType::whitePawn] & fileMasks[i]);
-				int blackPawnCount = Util::bitCount(board.bitBoards_[PieceType::whitePawn] & fileMasks[i]);
+			int doubledWhitePawnCount = Util::bitCount(board.bitBoards_[PieceType::whitePawn] & (board.bitBoards_[PieceType::whitePawn] >> 8));
+			int doubledBlackPawnCount = Util::bitCount(board.bitBoards_[PieceType::blackPawn] & board.bitBoards_[PieceType::blackPawn] << 8);
 
-				if (whitePawnCount > 1)
+			eval -= doubledPawnPentalty * (doubledWhitePawnCount);
+			eval += doubledPawnPentalty * (doubledBlackPawnCount);
+
+			uint64_t whitePawns = board.bitBoards_[PieceType::whitePawn];
+			uint64_t blackPawns = board.bitBoards_[PieceType::blackPawn];
+			
+			while (whitePawns)
+			{
+				int file = Util::popLSB(whitePawns) % 8;
+				
+				if (!(adjacentFileMasks[file] & board.bitBoards_[PieceType::whitePawn]))
 				{
-					eval -= doubledPawnPentalty * whitePawnCount - 1;
-				}
-				if (blackPawnCount > 1)
-				{
-					eval += doubledPawnPentalty * whitePawnCount - 1;
+					eval -= isolatedPawnPentalty;
 				}
 			}
+			while (blackPawns)
+			{
+				int file = Util::popLSB(whitePawns) % 8;
+
+				if (!(adjacentFileMasks[file] & board.bitBoards_[PieceType::blackPawn]))
+				{
+					eval += isolatedPawnPentalty;
+				}
+			}
+
+			
 
 			return eval;
 		}
@@ -108,6 +126,17 @@ namespace Eval
 			egTable_[9][i] = egValue_[3] + egBishopTable[i ^ 56];
 			egTable_[10][i] = egValue_[4] + egKnightTable[i ^ 56];
 			egTable_[11][i] = egValue_[5] + egPawnTable[i ^ 56];
+
+			for (int i = 8; i < 64; i++)
+			{
+				int file = i % 8;
+				whitePassedPawnMask[i] = fileMasks[file] | adjacentFileMasks[file];
+				whitePassedPawnMask[i] &= ~((1ULL << (i + 1)) - 1);
+			}
+			for (int i = 8; i < 56; i++)
+			{
+				blackPassedPawnMask[i] = whitePassedPawnMask[i ^ 56];
+			}
 		}
 	}
 
