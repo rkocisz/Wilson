@@ -133,6 +133,7 @@ namespace MoveGen
 			}
 		}
 
+
 		void generateWhiteKnightMoves()
 		{
 			uint64_t knights = board_->bitBoards_[PieceType::whiteKnight];
@@ -150,6 +151,7 @@ namespace MoveGen
 			}
 		}
 
+
 		void generateWhiteBishopMoves()
 		{
 			uint64_t bishops = board_->bitBoards_[PieceType::whiteBishop];
@@ -166,6 +168,7 @@ namespace MoveGen
 				}
 			}
 		}
+
 
 		void generateWhiteRookMoves()
 		{
@@ -186,6 +189,7 @@ namespace MoveGen
 			}
 		}
 
+
 		void generateWhiteQueenMoves()
 		{
 			uint64_t queens = board_->bitBoards_[PieceType::whiteQueen];
@@ -200,6 +204,7 @@ namespace MoveGen
 				}
 			}
 		}
+
 
 		void generateWhiteKingMoves()
 		{
@@ -221,6 +226,7 @@ namespace MoveGen
 				pseudoLegalMoves_.emplace_back(60, 58, PieceType::whiteKing, PieceType::empty, PieceType::empty, MoveType::longCastle);
 			}
 		}
+
 
 		void generateBlackPawnMoves()
 		{
@@ -325,6 +331,7 @@ namespace MoveGen
 			}
 		}
 
+
 		void generateBlackKnightMoves()
 		{
 			uint64_t knights = board_->bitBoards_[PieceType::blackKnight];
@@ -342,6 +349,7 @@ namespace MoveGen
 			}
 		}
 
+
 		void generateBlackBishopMoves()
 		{
 			uint64_t bishops = board_->bitBoards_[PieceType::blackBishop];
@@ -358,6 +366,7 @@ namespace MoveGen
 				}
 			}
 		}
+
 
 		void generateBlackRookMoves()
 		{
@@ -377,6 +386,7 @@ namespace MoveGen
 			}
 		}
 
+
 		void generateBlackQueenMoves()
 		{
 			uint64_t queens = board_->bitBoards_[PieceType::blackQueen];
@@ -391,6 +401,7 @@ namespace MoveGen
 				}
 			}
 		}
+
 
 		void generateBlackKingMoves()
 		{
@@ -412,6 +423,7 @@ namespace MoveGen
 				pseudoLegalMoves_.emplace_back(4, 2, PieceType::blackKing, PieceType::empty, PieceType::empty, MoveType::longCastle);
 			}
 		}
+
 
 		bool isSquareAttacked(int square, Color attacker)
 		{
@@ -463,6 +475,7 @@ namespace MoveGen
 			return false;
 		}
 
+
 		void generatePseudoLegalMoves()
 		{
 			pseudoLegalMoves_.clear();
@@ -488,6 +501,7 @@ namespace MoveGen
 			return;
 		}
 	}
+
 
 	std::vector<Move> generateLegalMoves(Board* board)
 	{
@@ -523,7 +537,5 @@ namespace MoveGen
 		}
 		return legalMoves_;
 	}
-
-	
 }
 

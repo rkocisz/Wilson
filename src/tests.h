@@ -23,6 +23,7 @@ void testMoveAndUnmakeMove()
     assert(board == boardBackup);
 }
 
+
 void testZobristKeyGeneration()
 {
     Board board = Board();
@@ -33,6 +34,7 @@ void testZobristKeyGeneration()
 
     assert(board.getZobristKey() == board.getNewlyGeneratedZobristKey());
 }
+
 
 void thriceRepetitionTest()
 {
@@ -63,6 +65,7 @@ void thriceRepetitionTest()
 
 }
 
+
 long long perftRecursion(int depth, Board& board)
 {
     if (depth == 0)
@@ -86,6 +89,7 @@ long long perftRecursion(int depth, Board& board)
 
     return movesCount;
 }
+
 
 void perft()
 {

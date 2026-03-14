@@ -14,6 +14,7 @@ constexpr uint64_t FILE_A = 0x8080808080808080ULL;
 constexpr uint64_t RANK_3 = 0x0000000000FF0000ULL;
 constexpr uint64_t RANK_1 = 0x00000000000000FFULL;
 constexpr uint64_t RANK_6 = 0x0000FF0000000000ULL;
+constexpr uint64_t RANK_8 = 0xFF00000000000000ULL;
 
 constexpr uint64_t fileMasks[8] = {FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H};
 constexpr uint64_t adjacentFileMasks[8] = {FILE_B , FILE_A | FILE_C, FILE_B | FILE_D, FILE_C | FILE_E, FILE_D | FILE_F, FILE_E | FILE_G, FILE_F | FILE_H, FILE_G};
@@ -24,10 +25,33 @@ constexpr int eg_value[6] = { 94, 281, 297, 512,  936,  0 };
 
 constexpr int doubledPawnPentalty = 12;
 constexpr int isolatedPawnPentalty = 15;
-constexpr int mgPassedPawnBonus = 30;
-constexpr int egPassedPawnBonus = 60;
 
-constexpr int mgPawnTable[64] = {
+constexpr int whitePassedPawnBonus[64] = 
+{
+     0,  0,  0,  0,  0,  0,  0,  0,
+    100,100,100,100,100,100,100,100,
+    60, 60, 60, 60, 60, 60, 60, 60,
+    35, 35, 35, 35, 35, 35, 35, 35,
+    20, 20, 20, 20, 20, 20, 20, 20,
+    10, 10, 10, 10, 10, 10, 10, 10,
+    5,  5,  5,  5,  5,  5,  5,  5,
+     0,  0,  0,  0,  0,  0,  0,  0
+};
+
+constexpr int blackPassedPawnBonus[64] = 
+{
+     0,  0,  0,  0,  0,  0,  0,  0,
+     5,  5,  5,  5,  5,  5,  5,  5,
+    10, 10, 10, 10, 10, 10, 10, 10,
+    20, 20, 20, 20, 20, 20, 20, 20,
+    35, 35, 35, 35, 35, 35, 35, 35,
+    60, 60, 60, 60, 60, 60, 60, 60,
+   100,100,100,100,100,100,100,100,
+     0,  0,  0,  0,  0,  0,  0,  0
+};
+
+constexpr int mgPawnTable[64] = 
+{
       0,   0,   0,   0,   0,   0,  0,   0,
      98, 134,  61,  95,  68, 126, 34, -11,
      -6,   7,  26,  31,  65,  56, 25, -20,
@@ -38,7 +62,8 @@ constexpr int mgPawnTable[64] = {
       0,   0,   0,   0,   0,   0,  0,   0,
 };
 
-constexpr int egPawnTable[64] = {
+constexpr int egPawnTable[64] = 
+{
       0,   0,   0,   0,   0,   0,   0,   0,
     178, 173, 158, 134, 147, 132, 165, 187,
      94, 100,  85,  67,  56,  53,  82,  84,
@@ -60,7 +85,8 @@ constexpr int mgKnightTable[64] = {
     -105, -21, -58, -33, -17, -28, -19,  -23,
 };
 
-constexpr int egKnightTable[64] = {
+constexpr int egKnightTable[64] = 
+{
     -58, -38, -13, -28, -31, -27, -63, -99,
     -25,  -8, -25,  -2,  -9, -25, -24, -52,
     -24, -20,  10,   9,  -1,  -9, -19, -41,
@@ -71,7 +97,8 @@ constexpr int egKnightTable[64] = {
     -29, -51, -23, -15, -22, -18, -50, -64,
 };
 
-constexpr int mgBishopTable[64] = {
+constexpr int mgBishopTable[64] = 
+{
     -29,   4, -82, -37, -25, -42,   7,  -8,
     -26,  16, -18, -13,  30,  59,  18, -47,
     -16,  37,  43,  40,  35,  50,  37,  -2,
@@ -82,7 +109,8 @@ constexpr int mgBishopTable[64] = {
     -33,  -3, -14, -21, -13, -12, -39, -21,
 };
 
-constexpr int egBishopTable[64] = {
+constexpr int egBishopTable[64] = 
+{
     -14, -21, -11,  -8, -7,  -9, -17, -24,
      -8,  -4,   7, -12, -3, -13,  -4, -14,
       2,  -8,   0,  -1, -2,   6,   0,   4,
@@ -93,7 +121,8 @@ constexpr int egBishopTable[64] = {
     -23,  -9, -23,  -5, -9, -16,  -5, -17,
 };
 
-constexpr int mgRookTable[64] = {
+constexpr int mgRookTable[64] = 
+{
      32,  42,  32,  51, 63,  9,  31,  43,
      27,  32,  58,  62, 80, 67,  26,  44,
      -5,  19,  26,  36, 17, 45,  61,  16,
@@ -104,7 +133,8 @@ constexpr int mgRookTable[64] = {
     -19, -13,   1,  17, 16,  7, -37, -26,
 };
 
-constexpr int egRookTable[64] = {
+constexpr int egRookTable[64] = 
+{
     13, 10, 18, 15, 12,  12,   8,   5,
     11, 13, 13, 11, -3,   3,   8,   3,
      7,  7,  7,  5,  4,  -3,  -5,  -3,
@@ -115,7 +145,8 @@ constexpr int egRookTable[64] = {
     -9,  2,  3, -1, -5, -13,   4, -20,
 };
 
-constexpr int mgQueenTable[64] = {
+constexpr int mgQueenTable[64] = 
+{
     -28,   0,  29,  12,  59,  44,  43,  45,
     -24, -39,  -5,   1, -16,  57,  28,  54,
     -13, -17,   7,   8,  29,  56,  47,  57,
@@ -126,7 +157,8 @@ constexpr int mgQueenTable[64] = {
      -1, -18,  -9,  10, -15, -25, -31, -50,
 };
 
-constexpr int egQueenTable[64] = {
+constexpr int egQueenTable[64] = 
+{
      -9,  22,  22,  27,  27,  19,  10,  20,
     -17,  20,  32,  41,  58,  25,  30,   0,
     -20,   6,   9,  49,  47,  35,  19,   9,
@@ -137,7 +169,8 @@ constexpr int egQueenTable[64] = {
     -33, -28, -22, -43,  -5, -32, -20, -41,
 };
 
-constexpr int mgKingTable[64] = {
+constexpr int mgKingTable[64] = 
+{
     -65,  23,  16, -15, -56, -34,   2,  13,
      29,  -1, -20,  -7,  -8,  -4, -38, -29,
      -9,  24,   2, -16, -20,   6,  22, -22,
@@ -148,7 +181,8 @@ constexpr int mgKingTable[64] = {
     -15,  36,  12, -54,   8, -28,  24,  14,
 };
 
-constexpr int egKingTable[64] = {
+constexpr int egKingTable[64] = 
+{
     -74, -35, -18, -18, -11,  15,   4, -17,
     -12,  17,  14,  17,  17,  38,  23,  11,
      10,  17,  23,  15,  20,  45,  44,  13,

@@ -1,6 +1,7 @@
 #include "evaluation.h"
 #include "common.h"
 #include "util.h"
+#include "moveGenUtil.h"
 
 namespace Eval
 {
@@ -13,15 +14,17 @@ namespace Eval
 		int egValue_[6] = {20000, 936, 512, 297, 281, 94};
 
 		int gamePhaseValue[6] = {0, 4, 2, 1, 1, 0};
+		int gamePhase_;
 
 		uint64_t whitePassedPawnMask[64];
 		uint64_t blackPassedPawnMask[64];
+
 
 		int evaluateMaterial(const Board& board)
 		{
 			int mgVal = 0;
 			int egVal = 0;
-			int gamePhase = 0;
+			gamePhase_ = 0;
 
 			for (int i = 0; i < 6; i++)
 			{
@@ -29,12 +32,12 @@ namespace Eval
 
 				while (pieceSquares)
 				{
-					int pos = Util::popLSB(pieceSquares);
+					int pos = 63 - Util::popLSB(pieceSquares);
 
 					mgVal += mgTable_[i][pos];
 					egVal += egTable_[i][pos];
 
-					gamePhase += gamePhaseValue[i];
+					gamePhase_ += gamePhaseValue[i];
 				}
 
 				int blackPieceIndex = i + 6;
@@ -42,27 +45,28 @@ namespace Eval
 
 				while (pieceSquares)
 				{
-					int pos = Util::popLSB(pieceSquares);
+					int pos = 63 - Util::popLSB(pieceSquares);
 
 					mgVal -= mgTable_[blackPieceIndex][pos];
 					egVal -= egTable_[blackPieceIndex][pos];
 
-					gamePhase += gamePhaseValue[i];
+					gamePhase_ += gamePhaseValue[i];
 				}
 			}
 
-			if (gamePhase > 24)
-				gamePhase = 24;
+			if (gamePhase_ > 24)
+				gamePhase_ = 24;
 
-			return (mgVal * gamePhase + egVal * (24 - gamePhase)) / 24;
+			return (mgVal * gamePhase_ + egVal * (24 - gamePhase_)) / 24;
 		}
 
-		int evaluatePawnStructure(const Board& board)
+
+		int evaluatePawnStructure(const Board& board)//run after evaluateMaterial(const Board& board) bc it updates gamePhase
 		{
 			int eval = 0;
 
 			int doubledWhitePawnCount = Util::bitCount(board.bitBoards_[PieceType::whitePawn] & (board.bitBoards_[PieceType::whitePawn] >> 8));
-			int doubledBlackPawnCount = Util::bitCount(board.bitBoards_[PieceType::blackPawn] & board.bitBoards_[PieceType::blackPawn] << 8);
+			int doubledBlackPawnCount = Util::bitCount(board.bitBoards_[PieceType::blackPawn] & (board.bitBoards_[PieceType::blackPawn] << 8));
 
 			eval -= doubledPawnPentalty * (doubledWhitePawnCount);
 			eval += doubledPawnPentalty * (doubledBlackPawnCount);
@@ -72,28 +76,143 @@ namespace Eval
 			
 			while (whitePawns)
 			{
-				int file = Util::popLSB(whitePawns) % 8;
+				int pos = 63 - Util::popLSB(whitePawns);
+				int file = pos % 8;
 				
 				if (!(adjacentFileMasks[file] & board.bitBoards_[PieceType::whitePawn]))
 				{
 					eval -= isolatedPawnPentalty;
 				}
+
+				if (!(whitePassedPawnMask[pos] & board.bitBoards_[PieceType::blackPawn]))
+				{
+					eval += whitePassedPawnBonus[pos];
+				}
 			}
 			while (blackPawns)
 			{
-				int file = Util::popLSB(whitePawns) % 8;
+				int pos = 63 - Util::popLSB(blackPawns);
+				int file = pos % 8;
 
 				if (!(adjacentFileMasks[file] & board.bitBoards_[PieceType::blackPawn]))
 				{
 					eval += isolatedPawnPentalty;
 				}
+				if (!(blackPassedPawnMask[pos] & board.bitBoards_[PieceType::whitePawn]))
+				{
+					eval -= blackPassedPawnBonus[pos];
+				}
 			}
-
-			
 
 			return eval;
 		}
 	}
+
+
+	int evaluatePieceStructure(const Board& board)
+	{
+		int eval = 0;
+		uint64_t whiteKnights = board.bitBoards_[PieceType::whiteKnight];
+		uint64_t blackKnights = board.bitBoards_[PieceType::blackKnight];
+
+		uint64_t whiteBishops = board.bitBoards_[PieceType::whiteBishop];
+		uint64_t blackBishops = board.bitBoards_[PieceType::blackBishop];
+
+		uint64_t whiteRooks = board.bitBoards_[PieceType::whiteRook];
+		uint64_t blackRooks = board.bitBoards_[PieceType::blackRook];
+
+		uint64_t whiteQueens = board.bitBoards_[PieceType::whiteQueen];
+		uint64_t blackQueens = board.bitBoards_[PieceType::blackQueen];
+
+		if (Util::bitCount(board.bitBoards_[PieceType::whiteBishop]) >= 2)
+			eval += 30;
+
+		if (Util::bitCount(board.bitBoards_[PieceType::blackBishop]) >= 2)
+			eval -= 30;
+
+		while (whiteKnights)
+		{
+			int pos = 63 - Util::popLSB(whiteKnights);
+
+			uint64_t moves = MoveGenUtil::knightMoves_[pos] & ~board.whitePieces_;
+			eval += (Util::bitCount(moves) - 4) * 4;
+		}
+		while (blackKnights)
+		{
+			int pos = 63 - Util::popLSB(blackKnights);
+
+			uint64_t moves = MoveGenUtil::knightMoves_[pos] & ~board.blackPieces_;
+			eval -= (Util::bitCount(moves) - 4) * 4;
+		}
+
+		while (whiteBishops)
+		{
+			int pos = 63 - Util::popLSB(whiteBishops);
+
+			uint64_t moves = MoveGenUtil::getBishopMoves(pos, board.allPieces_) & ~board.whitePieces_;
+			eval += (Util::bitCount(moves) - 5) * 3;
+		}
+		while (blackBishops)
+		{
+			int pos = 63 - Util::popLSB(blackBishops);
+
+			uint64_t moves = MoveGenUtil::getBishopMoves(pos, board.allPieces_) & ~board.blackPieces_;
+			eval -= (Util::bitCount(moves) - 5) * 3;
+		}
+
+		while (whiteRooks)
+		{
+			int pos = 63 - Util::popLSB(whiteRooks);
+			int file = pos % 8;
+
+			uint64_t moves = MoveGenUtil::getRookMoves(pos, board.allPieces_) & ~board.whitePieces_;
+			eval += (Util::bitCount(moves) - 6) * 2;
+
+			if (!(fileMasks[file] & board.bitBoards_[PieceType::whitePawn]))
+			{
+				eval += 15;
+				if (!(fileMasks[file] & board.bitBoards_[PieceType::blackPawn]))
+				{
+					eval += 10;
+				}
+			}
+		}
+		while (blackRooks)
+		{
+			int pos = 63 - Util::popLSB(blackRooks);
+			int file = pos % 8;
+
+			uint64_t moves = MoveGenUtil::getRookMoves(pos, board.allPieces_) & ~board.blackPieces_;
+			eval -= (Util::bitCount(moves) - 6) * 2;
+
+			if (!(fileMasks[file] & board.bitBoards_[PieceType::blackPawn]))
+			{
+				eval -= 15;
+				if (!(fileMasks[file] & board.bitBoards_[PieceType::whitePawn]))
+				{
+					eval -= 10;
+				}
+			}
+		}
+
+		while (whiteQueens)
+		{
+			int pos = 63 - Util::popLSB(whiteQueens);
+
+			uint64_t moves = (MoveGenUtil::getRookMoves(pos, board.allPieces_) | MoveGenUtil::getBishopMoves(pos, board.allPieces_)) & ~board.whitePieces_;
+			eval += (Util::bitCount(moves) - 10);
+		}
+		while (blackQueens)
+		{
+			int pos = 63 - Util::popLSB(blackQueens);
+
+			uint64_t moves = (MoveGenUtil::getRookMoves(pos, board.allPieces_) | MoveGenUtil::getBishopMoves(pos, board.allPieces_)) & ~board.blackPieces_;
+			eval -= (Util::bitCount(moves) - 10);
+		}
+
+		return eval;
+	}
+
 
 	void init()
 	{
@@ -145,7 +264,8 @@ namespace Eval
 		int eval = 0;
 
 		eval += evaluateMaterial(board);
-
+		eval += evaluatePieceStructure(board);
+		eval += evaluatePawnStructure(board);
 
 		return (board.sideToMove_ == Color::white) ? eval : -eval;
 	}

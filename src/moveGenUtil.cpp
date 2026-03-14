@@ -17,6 +17,7 @@ namespace MoveGenUtil
 		uint64_t bishopMoves_[64][512];
 		uint64_t rookMoves_[64][4096];
 
+
 		void initKnightMoves()
 		{
 			for (int sq = 0; sq < 64; sq++)
@@ -47,6 +48,7 @@ namespace MoveGenUtil
 				knightMoves_[sq] = moves;
 			}
 		}
+
 
 		void initKingMoves()
 		{
@@ -79,6 +81,7 @@ namespace MoveGenUtil
 			}
 		}
 
+
 		uint64_t computeRookRelevantOccupancy(int square)
 		{
 			uint64_t mask = 0ULL;
@@ -100,6 +103,7 @@ namespace MoveGenUtil
 
 			return mask;
 		}
+
 
 		uint64_t generateBishopOccupancyFromIndex(int square, int index)
 		{
@@ -123,6 +127,7 @@ namespace MoveGenUtil
 			return occupancyMask;
 		}
 
+
 		uint64_t generateRookOccupancyFromIndex(int square, int index)
 		{
 			uint64_t startingMask = rookMagic_[square].relevantMask;
@@ -144,6 +149,7 @@ namespace MoveGenUtil
 			}
 			return occupancyMask;
 		}
+
 
 		bool testMagicNumber(int square, uint64_t magicNumber, bool isBishop)
 		{
@@ -189,6 +195,7 @@ namespace MoveGenUtil
 
 			return true;
 		}
+
 
 		void initMagicBitboards()
 		{
@@ -258,6 +265,7 @@ namespace MoveGenUtil
 		}
 	}
 
+
 	void init()
 	{
 		initKingMoves();
@@ -298,6 +306,7 @@ namespace MoveGenUtil
 		return moves;
 	}
 
+
 	uint64_t computeRookMoves(int square, uint64_t occupancy)
 	{
 		uint64_t moves = 0ULL;
@@ -332,6 +341,7 @@ namespace MoveGenUtil
 		return moves;
 	}
 
+
 	uint64_t getBishopMoves(int square, uint64_t occupancy)
 	{
 		occupancy &= bishopMagic_[square].relevantMask;
@@ -339,6 +349,7 @@ namespace MoveGenUtil
 		occupancy >>= bishopMagic_[square].shift;
 		return bishopMoves_[square][occupancy];
 	}
+
 
 	uint64_t getRookMoves(int square, uint64_t occupancy)
 	{

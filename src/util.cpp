@@ -16,10 +16,12 @@ namespace Util
 		std::mt19937_64 rng(123456);
 	}
 	
+
 	uint64_t randomU64() 
 	{ 
 		return rng();
 	}
+
 
 	int popLSB(uint64_t& x)
 	{
@@ -27,6 +29,7 @@ namespace Util
 		x &= x - 1;
 		return bitPos;
 	}
+
 
 	int bitCount(uint64_t x)
 	{
@@ -45,6 +48,7 @@ namespace Util
 	{
 		return 1ULL << (63 - square);
 	}
+
 
 	Color opposite(Color c)
 	{
