@@ -13,11 +13,17 @@ namespace Eval
 		int mgValue_[6] = {20000, 1025, 477, 365, 337, 82};
 		int egValue_[6] = {20000, 936, 512, 297, 281, 94};
 
-		int gamePhaseValue[6] = {0, 4, 2, 1, 1, 0};
+		int gamePhaseValue_[6] = {0, 4, 2, 1, 1, 0};
 		int gamePhase_;
 
-		uint64_t whitePassedPawnMask[64];
-		uint64_t blackPassedPawnMask[64];
+		uint64_t whitePassedPawnMask_[64];
+		uint64_t blackPassedPawnMask_[64];
+
+		uint64_t whiteKingSideCastleAreaMask = 0ULL;
+		uint64_t whiteQueenSideCastleAreaMask = 0ULL;
+
+		uint64_t blackKingSideCastleAreaMask = 0ULL;
+		uint64_t blackQueenSideCastleAreaMask = 0ULL;
 
 
 		int evaluateMaterial(const Board& board)
@@ -37,7 +43,7 @@ namespace Eval
 					mgVal += mgTable_[i][pos];
 					egVal += egTable_[i][pos];
 
-					gamePhase_ += gamePhaseValue[i];
+					gamePhase_ += gamePhaseValue_[i];
 				}
 
 				int blackPieceIndex = i + 6;
@@ -50,7 +56,7 @@ namespace Eval
 					mgVal -= mgTable_[blackPieceIndex][pos];
 					egVal -= egTable_[blackPieceIndex][pos];
 
-					gamePhase_ += gamePhaseValue[i];
+					gamePhase_ += gamePhaseValue_[i];
 				}
 			}
 
@@ -61,7 +67,7 @@ namespace Eval
 		}
 
 
-		int evaluatePawnStructure(const Board& board)//run after evaluateMaterial(const Board& board) bc it updates gamePhase
+		int evaluatePawnStructure(const Board& board)
 		{
 			int eval = 0;
 
@@ -84,7 +90,7 @@ namespace Eval
 					eval -= isolatedPawnPentalty;
 				}
 
-				if (!(whitePassedPawnMask[pos] & board.bitBoards_[PieceType::blackPawn]))
+				if (!(whitePassedPawnMask_[pos] & board.bitBoards_[PieceType::blackPawn]))
 				{
 					eval += whitePassedPawnBonus[pos];
 				}
@@ -98,7 +104,7 @@ namespace Eval
 				{
 					eval += isolatedPawnPentalty;
 				}
-				if (!(blackPassedPawnMask[pos] & board.bitBoards_[PieceType::whitePawn]))
+				if (!(blackPassedPawnMask_[pos] & board.bitBoards_[PieceType::whitePawn]))
 				{
 					eval -= blackPassedPawnBonus[pos];
 				}
@@ -176,6 +182,11 @@ namespace Eval
 					eval += 10;
 				}
 			}
+
+			if (Util::squareMask(pos) & RANK_7)
+			{
+				eval += 20;
+			}
 		}
 		while (blackRooks)
 		{
@@ -192,6 +203,11 @@ namespace Eval
 				{
 					eval -= 10;
 				}
+			}
+
+			if (Util::squareMask(pos) & RANK_2)
+			{
+				eval -= 20;
 			}
 		}
 
@@ -213,6 +229,39 @@ namespace Eval
 		return eval;
 	}
 
+	int evaluateKingSafety(const Board& board) // call after evaluateMaterial()
+	{
+		int eval = 0;
+		int mgVal = 0;
+		uint64_t whiteKingMask = board.bitBoards_[PieceType::whiteKing];
+		uint64_t blackKingMask = board.bitBoards_[PieceType::blackKing];
+
+		if (whiteKingMask & whiteKingSideCastleAreaMask)
+		{
+			int pawnsInWall = Util::bitCount(whiteKingSideCastleAreaMask& board.bitBoards_[PieceType::whitePawn]);
+			mgVal -= (3 - pawnsInWall) * pawnShieldPenalty;
+		}
+		else if(whiteKingMask & whiteQueenSideCastleAreaMask)
+		{
+			int pawnsInWall = Util::bitCount(whiteQueenSideCastleAreaMask & board.bitBoards_[PieceType::whitePawn]);
+			mgVal -= (3 - pawnsInWall) * pawnShieldPenalty;
+		}
+
+		if (blackKingMask & blackKingSideCastleAreaMask)
+		{
+			int pawnsInWall = Util::bitCount(blackKingSideCastleAreaMask & board.bitBoards_[PieceType::blackPawn]);
+			mgVal += (3 - pawnsInWall) * pawnShieldPenalty;
+		}
+		else if (blackKingMask & blackQueenSideCastleAreaMask)
+		{
+			int pawnsInWall = Util::bitCount(blackQueenSideCastleAreaMask & board.bitBoards_[PieceType::blackPawn]);
+			mgVal += (3 - pawnsInWall) * pawnShieldPenalty;
+		}
+
+		eval += (mgVal * gamePhase_) / 24;
+
+		return eval;
+	}
 
 	void init()
 	{
@@ -249,13 +298,25 @@ namespace Eval
 			for (int i = 8; i < 64; i++)
 			{
 				int file = i % 8;
-				whitePassedPawnMask[i] = fileMasks[file] | adjacentFileMasks[file];
-				whitePassedPawnMask[i] &= ~((1ULL << (i + 1)) - 1);
+				whitePassedPawnMask_[i] = fileMasks[file] | adjacentFileMasks[file];
+				whitePassedPawnMask_[i] &= ~((1ULL << (i + 1)) - 1);
 			}
 			for (int i = 8; i < 56; i++)
 			{
-				blackPassedPawnMask[i] = whitePassedPawnMask[i ^ 56];
+				blackPassedPawnMask_[i] = whitePassedPawnMask_[i ^ 56];
 			}
+
+			whiteKingSideCastleAreaMask |= (1ULL | (1ULL << 1) | (1ULL << 2));
+			whiteKingSideCastleAreaMask |= (whiteKingSideCastleAreaMask << 8) | (whiteKingSideCastleAreaMask << 16);
+
+			whiteQueenSideCastleAreaMask |= ((1ULL << 5) | (1ULL << 6) | (1ULL << 7));
+			whiteQueenSideCastleAreaMask |= (whiteQueenSideCastleAreaMask << 8) | (whiteQueenSideCastleAreaMask << 16);
+
+			blackKingSideCastleAreaMask |= ((1ULL << 56) | (1ULL << 57) | (1ULL << 58));
+			blackKingSideCastleAreaMask |= (blackKingSideCastleAreaMask >> 8) | (blackKingSideCastleAreaMask >> 16);
+
+			blackQueenSideCastleAreaMask |= ((1ULL << 61) | (1ULL << 62) | (1ULL << 63));
+			blackQueenSideCastleAreaMask |= (blackQueenSideCastleAreaMask >> 8) | (blackQueenSideCastleAreaMask >> 16);
 		}
 	}
 
@@ -266,6 +327,7 @@ namespace Eval
 		eval += evaluateMaterial(board);
 		eval += evaluatePieceStructure(board);
 		eval += evaluatePawnStructure(board);
+		eval += evaluateKingSafety(board);
 
 		return (board.sideToMove_ == Color::white) ? eval : -eval;
 	}

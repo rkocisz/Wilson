@@ -11,9 +11,11 @@ constexpr uint64_t FILE_D = 0x1010101010101010ULL;
 constexpr uint64_t FILE_C = 0x2020202020202020ULL;
 constexpr uint64_t FILE_B = 0x4040404040404040ULL;
 constexpr uint64_t FILE_A = 0x8080808080808080ULL;
-constexpr uint64_t RANK_3 = 0x0000000000FF0000ULL;
 constexpr uint64_t RANK_1 = 0x00000000000000FFULL;
+constexpr uint64_t RANK_2 = 0x000000000000FF00ULL;
+constexpr uint64_t RANK_3 = 0x0000000000FF0000ULL;
 constexpr uint64_t RANK_6 = 0x0000FF0000000000ULL;
+constexpr uint64_t RANK_7 = 0x00FF000000000000ULL;
 constexpr uint64_t RANK_8 = 0xFF00000000000000ULL;
 
 constexpr uint64_t fileMasks[8] = {FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H};
@@ -25,6 +27,7 @@ constexpr int eg_value[6] = { 94, 281, 297, 512,  936,  0 };
 
 constexpr int doubledPawnPentalty = 12;
 constexpr int isolatedPawnPentalty = 15;
+constexpr int pawnShieldPenalty = 12;
 
 constexpr int whitePassedPawnBonus[64] = 
 {
