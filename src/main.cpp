@@ -12,10 +12,6 @@ int main()
 {
     SetConsoleOutputCP(CP_UTF8);
 
-    std::cout << "♔ ♕ ♖ ♗ ♘ ♙" << std::endl;
-
-    
-
     MoveGenUtil::init();
     Eval::init();
 
@@ -25,6 +21,9 @@ int main()
     //perft();
 
     Board board;
+
+    std::vector<Move> moves = MoveGen::generateLegalMoves(&board);
+
     board.draw();
     std::cout << "\n\neval: " << Eval::evaluate(board);
 

@@ -294,30 +294,32 @@ namespace Eval
 			egTable_[9][i] = egValue_[3] + egBishopTable[i ^ 56];
 			egTable_[10][i] = egValue_[4] + egKnightTable[i ^ 56];
 			egTable_[11][i] = egValue_[5] + egPawnTable[i ^ 56];
-
-			for (int i = 8; i < 64; i++)
-			{
-				int file = i % 8;
-				whitePassedPawnMask_[i] = fileMasks[file] | adjacentFileMasks[file];
-				whitePassedPawnMask_[i] &= ~((1ULL << (i + 1)) - 1);
-			}
-			for (int i = 8; i < 56; i++)
-			{
-				blackPassedPawnMask_[i] = whitePassedPawnMask_[i ^ 56];
-			}
-
-			whiteKingSideCastleAreaMask |= (1ULL | (1ULL << 1) | (1ULL << 2));
-			whiteKingSideCastleAreaMask |= (whiteKingSideCastleAreaMask << 8) | (whiteKingSideCastleAreaMask << 16);
-
-			whiteQueenSideCastleAreaMask |= ((1ULL << 5) | (1ULL << 6) | (1ULL << 7));
-			whiteQueenSideCastleAreaMask |= (whiteQueenSideCastleAreaMask << 8) | (whiteQueenSideCastleAreaMask << 16);
-
-			blackKingSideCastleAreaMask |= ((1ULL << 56) | (1ULL << 57) | (1ULL << 58));
-			blackKingSideCastleAreaMask |= (blackKingSideCastleAreaMask >> 8) | (blackKingSideCastleAreaMask >> 16);
-
-			blackQueenSideCastleAreaMask |= ((1ULL << 61) | (1ULL << 62) | (1ULL << 63));
-			blackQueenSideCastleAreaMask |= (blackQueenSideCastleAreaMask >> 8) | (blackQueenSideCastleAreaMask >> 16);
 		}
+
+		for (int square = 0; square < 64; square++)
+		{
+			int file = square % 8;
+			uint64_t fileAndAdjacentFilesMask = fileMasks[file] | adjacentFileMasks[file];
+
+			int bitPos = 63 - square;
+			uint64_t whiteForwardMask = (square / 8 == 0) ? 0ULL : ~((1ULL << (bitPos + 1)) - 1);
+			uint64_t blackForwardMask = (square / 8 == 7) ? 0ULL : ((1ULL << bitPos) - 1);
+
+			whitePassedPawnMask_[square] = fileAndAdjacentFilesMask & whiteForwardMask;
+			blackPassedPawnMask_[square] = fileAndAdjacentFilesMask & blackForwardMask;
+		}
+
+		whiteKingSideCastleAreaMask |= (1ULL | (1ULL << 1) | (1ULL << 2));
+		whiteKingSideCastleAreaMask |= (whiteKingSideCastleAreaMask << 8) | (whiteKingSideCastleAreaMask << 16);
+
+		whiteQueenSideCastleAreaMask |= ((1ULL << 5) | (1ULL << 6) | (1ULL << 7));
+		whiteQueenSideCastleAreaMask |= (whiteQueenSideCastleAreaMask << 8) | (whiteQueenSideCastleAreaMask << 16);
+
+		blackKingSideCastleAreaMask |= ((1ULL << 56) | (1ULL << 57) | (1ULL << 58));
+		blackKingSideCastleAreaMask |= (blackKingSideCastleAreaMask >> 8) | (blackKingSideCastleAreaMask >> 16);
+
+		blackQueenSideCastleAreaMask |= ((1ULL << 61) | (1ULL << 62) | (1ULL << 63));
+		blackQueenSideCastleAreaMask |= (blackQueenSideCastleAreaMask >> 8) | (blackQueenSideCastleAreaMask >> 16);
 	}
 
 	int evaluate(const Board& board)

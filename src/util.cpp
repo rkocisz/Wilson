@@ -9,7 +9,11 @@
 
 namespace Util
 {
-	const char* piecesEmotes_[12] = { "♚", "♛", "♜", "♝", "♞", "♟","♔", "♕", "♖", "♗", "♘", "♙" };
+	const char* piecesEmotes_[12] = 
+	{
+			"\xE2\x99\x9A", "\xE2\x99\x9B", "\xE2\x99\x9C", "\xE2\x99\x9D", "\xE2\x99\x9E", "\xE2\x99\x9F",
+			"\xE2\x99\x94", "\xE2\x99\x95", "\xE2\x99\x96", "\xE2\x99\x97", "\xE2\x99\x98", "\xE2\x99\x99"
+	};
 
 	namespace
 	{
