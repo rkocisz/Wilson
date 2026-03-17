@@ -3,6 +3,9 @@
 
 #include <cstdint>
 
+constexpr int EVAL_INFINITY = 100000;
+constexpr int MATE_EVAL = -50000;
+
 constexpr uint64_t FILE_H = 0x0101010101010101ULL;
 constexpr uint64_t FILE_G = 0x0202020202020202ULL;
 constexpr uint64_t FILE_F = 0x0404040404040404ULL;

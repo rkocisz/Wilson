@@ -537,5 +537,27 @@ namespace MoveGen
 		}
 		return legalMoves_;
 	}
+
+	bool isInCheck(Board* board)
+	{
+		if (board->sideToMove_ == Color::white)
+		{
+			int kingPos = 63 - std::countr_zero(board->bitBoards_[PieceType::whiteKing]);
+			if (isSquareAttacked(kingPos, Color::black))
+			{
+				return true;
+			}
+		}
+		else
+		{
+			int kingPos = 63 - std::countr_zero(board->bitBoards_[PieceType::blackKing]);
+			if (isSquareAttacked(kingPos, Color::white))
+			{
+				return true;
+			}
+		}
+
+		
+	}
 }
 

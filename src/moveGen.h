@@ -6,6 +6,7 @@
 namespace MoveGen
 {
 	std::vector<Move> generateLegalMoves(Board* board);
+	bool isInCheck(Board* board);
 }
 
 #endif 

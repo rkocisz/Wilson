@@ -3,6 +3,8 @@
 #include "util.h"
 #include "moveGenUtil.h"
 
+#include <iostream>
+
 namespace Eval
 {
 	namespace
@@ -43,6 +45,8 @@ namespace Eval
 					mgVal += mgTable_[i][pos];
 					egVal += egTable_[i][pos];
 
+
+					std::cout << Util::piecesEmotes_[i] << ":" << mgTable_[i][pos] << "\n";
 					gamePhase_ += gamePhaseValue_[i];
 				}
 

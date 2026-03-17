@@ -44,6 +44,8 @@ public:
 	int enPassantSquare_;
 	Color sideToMove_;
 
+	GameState gameState_;
+
 private:
 	void initZobrist();
 	uint64_t computeZobrist();
@@ -53,8 +55,6 @@ private:
 	int halfmoveClock_;
 	std::vector<uint64_t> positionHistory_;
 	std::stack<UnmakeInfo> unmakeStack_;
-
-	GameState gameState_;
 
 
 	//Zobrist

@@ -4,6 +4,10 @@
 #include "board.h"
 #include "enums.h"
 #include "moveGen.h"
+#include "common.h"
+#include "evaluation.h"
+#include "util.h";
+
 #include <cassert>
 #include <iostream>
 #include <cinttypes>
@@ -158,6 +162,57 @@ void perft()
     std::cout << "perft took: " << elapsed.count() << " seconds\n";
     std::cout << "nodes per second: " << static_cast<uint64_t>(124132536 / elapsed.count()) << "\n";
 
+}
+
+void testEval()
+{
+    Board board;
+
+    std::vector<Move> moves = MoveGen::generateLegalMoves(&board);
+
+    if (Eval::evaluate(board) == 0)
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+
+    /*for (const Move& move : moves)
+    {
+        std::cout << "moved:" << Util::piecesEmotes_[move.moved] << " from: " << move.startPos << " to: " << move.endPos << "\n";
+
+        board.makeMove(move);
+        board.draw();
+        std::cout << "eval: " << Eval::evaluate(board) << "\n\n";
+        board.unmakeMove(move);
+    }*/
+
+    board = Board();
+    board.makeMove(moves[0]);
+    int eval1 = Eval::evaluate(board);
+    board.unmakeMove(moves[0]);
+
+    Move move = moves[0];
+    move.moved = PieceType::blackPawn;
+    move.startPos ^= 56;
+    move.endPos ^= 56;
+
+    board.makeMove(move);
+    int eval2 = Eval::evaluate(board);
+    board.unmakeMove(move);
+
+    if (eval1 + eval2 == 0)
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+
+    
 }
 
 #endif

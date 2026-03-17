@@ -25,6 +25,16 @@ struct Move
 	, moveType(moveType)
 	{ 
 	}
+
+	Move()
+	: startPos(-1)
+	, endPos(-1)
+	, moved(PieceType::empty)
+	, captured(PieceType::empty)
+	, promotion(PieceType::empty)
+	, moveType(MoveType::normal)
+	{
+	}
 };
 
 struct UnmakeInfo 

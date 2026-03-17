@@ -506,14 +506,14 @@ void Board::draw()
 	}
 
 
-	std::cout << "\n\n\n";
+	/*std::cout << "\n\n\n";
 
 	for (int i = 0; i < 12; i++)
 	{
 		std::cout << std::bitset<64>(bitBoards_[i]) << "\n";
 	}
 
-	std::cout << "\n" << std::bitset<64>(whitePieces_) << "\n" << std::bitset<64>(blackPieces_) << "\n" << std::bitset<64>(allPieces_) << "\n";
+	std::cout << "\n" << std::bitset<64>(whitePieces_) << "\n" << std::bitset<64>(blackPieces_) << "\n" << std::bitset<64>(allPieces_) << "\n";*/
 }
 
 const GameState& Board::getGamestate()

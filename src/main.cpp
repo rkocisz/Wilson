@@ -7,6 +7,7 @@
 #include "util.h"
 #include "moveGenUtil.h"
 #include "evaluation.h"
+#include "search.h"
 
 int main()
 {
@@ -19,13 +20,21 @@ int main()
     //testZobristKeyGeneration();
     //thriceRepetitionTest();
     //perft();
+    //testEval();
 
     Board board;
+    board = Board();
 
-    std::vector<Move> moves = MoveGen::generateLegalMoves(&board);
-
-    board.draw();
-    std::cout << "\n\neval: " << Eval::evaluate(board);
+    while (board.gameState_ == GameState::playing)
+    {
+        std::vector<Move> legalMoves = MoveGen::generateLegalMoves(&board);
+        
+        std::cout << "dostêpne ruchy:";
+        for (int i = 0; i < legalMoves.size(); i++)
+        {
+            std::cout  << i << ":" << Util::piecesEmotes_[legalMoves[i].moved] << " from: " << legalMoves[i].startPos << " to: " << legalMoves[i].endPos << "\n";
+        }
+    }
 
     return 0;
 }
