@@ -46,7 +46,7 @@ namespace Eval
 					egVal += egTable_[i][pos];
 
 
-					std::cout << Util::piecesEmotes_[i] << ":" << mgTable_[i][pos] << "\n";
+					//std::cout << Util::piecesEmotes_[i] << ":" << mgTable_[i][pos] << "\n";
 					gamePhase_ += gamePhaseValue_[i];
 				}
 

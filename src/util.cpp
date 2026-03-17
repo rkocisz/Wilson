@@ -58,6 +58,20 @@ namespace Util
 	{
 		return (c == white) ? black : white;
 	}
+
+	std::string squareToNotation(int sq) 
+	{
+		int fileNum = sq % 8;
+		int rankNum = sq / 8;
+
+		char file = 'a' + fileNum;
+		char rank = '8' - rankNum;
+
+		std::string s = "";
+		s += file;
+		s += rank;
+		return s;
+	}
 }
 
 

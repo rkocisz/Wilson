@@ -12,6 +12,7 @@ namespace Util
 	int bitCount(uint64_t x);
 	uint64_t squareMask(int square);
 	Color opposite(Color c);
+	std::string squareToNotation(int sq);
 
 	extern const char* piecesEmotes_[12];
 }
