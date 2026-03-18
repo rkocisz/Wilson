@@ -27,6 +27,8 @@ int main()
     board = Board();
     int selectedMove = 0;
 
+    
+
     while (board.gameState_ == GameState::playing)
     {
         board.draw();
@@ -44,9 +46,14 @@ int main()
             std::cout  << i << ":" << Util::piecesEmotes_[legalMoves[i].moved] << " from: " << Util::squareToNotation(legalMoves[i].startPos) << " to: " << Util::squareToNotation(legalMoves[i].endPos) << "\n";
         }
 
-        std::cout << "\n podaj id ruchu:";
-        std::cin >> selectedMove;
+        selectedMove = -1;
 
+        while (selectedMove < 0 || selectedMove > legalMoves.size() - 1)
+        {
+            std::cout << "\n podaj id ruchu:";
+            std::cin >> selectedMove;
+        }
+        
         board.makeMove(legalMoves[selectedMove]);
 
         board.draw();

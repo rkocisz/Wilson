@@ -43,8 +43,6 @@ int negamax(Board& board, int depth)
 		maxEval = (std::max)(maxEval, currentEval);
 	}
 
-
-
 	return maxEval;
 }
 
