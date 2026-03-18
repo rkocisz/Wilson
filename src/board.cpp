@@ -288,6 +288,7 @@ void Board::makeMove(Move move)
 	if (isPositionRepeatedThrice())
 	{
 		gameState_ = GameState::draw;
+		std::cout << "position repeated 3 times";
 	}
 }
 

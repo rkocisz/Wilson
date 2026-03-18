@@ -4,6 +4,7 @@
 #include <random>
 #include <cinttypes>
 #include "enums.h"
+#include "board.h"
 
 namespace Util
 {
@@ -13,6 +14,8 @@ namespace Util
 	uint64_t squareMask(int square);
 	Color opposite(Color c);
 	std::string squareToNotation(int sq);
+	std::string moveToLAN(Move& move);
+	Move LANToMove(std::string moveStr, Board& board);
 
 	extern const char* piecesEmotes_[12];
 }

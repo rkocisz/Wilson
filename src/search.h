@@ -8,42 +8,79 @@
 
 #include <algorithm>
 
-int negamax(Board& board, int depth)
+//int negamax(Board& board, int depth)
+//{
+//	if (depth == 0)
+//	{
+//		return Eval::evaluate(board);
+//	}
+//
+//	int maxEval = -EVAL_INFINITY;
+//	std::vector<Move> legalMoves = MoveGen::generateLegalMoves(&board);
+//
+//	if (legalMoves.size() == 0)
+//	{
+//		if (MoveGen::isInCheck(&board))
+//		{
+//			return MATE_EVAL;
+//		}
+//		else
+//		{
+//			return 0;
+//		}
+//	}
+//
+//	for (const Move& move : legalMoves)
+//	{
+//		board.makeMove(move);
+//		int currentEval = -negamax(board, depth - 1);
+//
+//		board.unmakeMove(move);
+//
+//		maxEval = (std::max)(maxEval, currentEval);
+//	}
+//
+//	return maxEval;
+//}
+
+int negamax(Board& board, int depth, int alpha, int beta)
 {
-	if (depth == 0)
-	{
-		return Eval::evaluate(board);
-	}
+    if (depth == 0)
+    {
+        return Eval::evaluate(board);
+    }
 
-	int maxEval = -EVAL_INFINITY;
-	std::vector<Move> legalMoves = MoveGen::generateLegalMoves(&board);
+    std::vector<Move> legalMoves = MoveGen::generateLegalMoves(&board);
 
-	if (legalMoves.size() == 0)
-	{
-		if (MoveGen::isInCheck(&board))
-		{
-			return MATE_EVAL;
-		}
-		else
-		{
-			return 0;
-		}
-	}
+    if (legalMoves.empty())
+    {
+        if (MoveGen::isInCheck(&board))
+        {
+            return -MATE_EVAL - depth;
+        }
+        return 0;
+    }
 
-	for (const Move& move : legalMoves)
-	{
-		board.makeMove(move);
-		int currentEval = -negamax(board, depth - 1);
+    for (const Move& move : legalMoves)
+    {
+        board.makeMove(move);
 
-		//board.draw();
-		//std::cout << currentEval << "\n";
+        int currentEval = -negamax(board, depth - 1, -beta, -alpha);
 
-		board.unmakeMove(move);
+        board.unmakeMove(move);
 
-		maxEval = (std::max)(maxEval, currentEval);
-	}
+        if (currentEval >= beta)
+        {
+            return beta;
+        }
 
-	return maxEval;
+        if (currentEval > alpha)
+        {
+            alpha = currentEval;
+        }
+    }
+
+    return alpha;
 }
 
 Move findBestMove(Board& board, int depth)
@@ -70,7 +107,7 @@ Move findBestMove(Board& board, int depth)
 	for (const Move& move : legalMoves)
 	{
 		board.makeMove(move);
-		int currentEval = -negamax(board, depth - 1);
+		int currentEval = -negamax(board, depth - 1, -EVAL_INFINITY, EVAL_INFINITY);
 
 		board.unmakeMove(move);
 

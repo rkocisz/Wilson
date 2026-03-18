@@ -220,14 +220,14 @@ namespace Eval
 			int pos = 63 - Util::popLSB(whiteQueens);
 
 			uint64_t moves = (MoveGenUtil::getRookMoves(pos, board.allPieces_) | MoveGenUtil::getBishopMoves(pos, board.allPieces_)) & ~board.whitePieces_;
-			eval += (Util::bitCount(moves) - 10);
+			eval += (Util::bitCount(moves) - 8) / 2;
 		}
 		while (blackQueens)
 		{
 			int pos = 63 - Util::popLSB(blackQueens);
 
 			uint64_t moves = (MoveGenUtil::getRookMoves(pos, board.allPieces_) | MoveGenUtil::getBishopMoves(pos, board.allPieces_)) & ~board.blackPieces_;
-			eval -= (Util::bitCount(moves) - 10);
+			eval -= (Util::bitCount(moves) - 8) / 2;
 		}
 
 		return eval;

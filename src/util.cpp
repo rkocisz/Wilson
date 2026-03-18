@@ -1,6 +1,8 @@
 ﻿#include "util.h"
 #include "common.h"
 #include "structs.h"
+#include "board.h"
+#include "moveGen.h"
 
 #include <iostream>
 #include <bit>
@@ -71,6 +73,37 @@ namespace Util
 		s += file;
 		s += rank;
 		return s;
+	}
+
+	std::string moveToLAN(Move& move)
+	{
+		std::string s = squareToNotation(move.startPos) + squareToNotation(move.endPos);
+
+		if (move.promotion != PieceType::empty) 
+		{
+			if (move.promotion == PieceType::whiteQueen || move.promotion == PieceType::blackQueen) s += "q";
+			else if (move.promotion == PieceType::whiteRook || move.promotion == PieceType::blackRook) s += "r";
+			else if (move.promotion == PieceType::whiteBishop || move.promotion == PieceType::blackBishop) s += "b";
+			else if (move.promotion == PieceType::whiteKnight || move.promotion == PieceType::blackKnight) s += "n";
+		}
+
+		return s;
+	}
+
+	Move LANToMove(std::string moveStr, Board& board)
+	{
+		std::vector<Move> moves = MoveGen::generateLegalMoves(&board);
+		
+		for (int i = 0; i < moves.size(); i++)
+		{
+			if (moveToLAN(moves[i]) == moveStr)
+			{
+				return moves[i];
+			}
+		}
+	
+		Move move;
+		return move;
 	}
 }
 
