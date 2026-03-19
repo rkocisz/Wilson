@@ -27,6 +27,7 @@ namespace Eval
 		uint64_t blackKingSideCastleAreaMask = 0ULL;
 		uint64_t blackQueenSideCastleAreaMask = 0ULL;
 
+		uint64_t kingZoneMask_[2][64];
 
 		int evaluateMaterial(const Board& board)
 		{
@@ -237,6 +238,9 @@ namespace Eval
 	{
 		int eval = 0;
 		int mgVal = 0;
+		int attackUnitsAtWhiteKing = 0;
+		int attackUnitsAtBlackKing = 0;
+
 		uint64_t whiteKingMask = board.bitBoards_[PieceType::whiteKing];
 		uint64_t blackKingMask = board.bitBoards_[PieceType::blackKing];
 
@@ -298,6 +302,22 @@ namespace Eval
 			egTable_[9][i] = egValue_[3] + egBishopTable[i ^ 56];
 			egTable_[10][i] = egValue_[4] + egKnightTable[i ^ 56];
 			egTable_[11][i] = egValue_[5] + egPawnTable[i ^ 56];
+		
+			uint64_t whiteKingZoneMask = MoveGenUtil::kingMoves_[i];	
+			uint64_t blackKingZoneMask = MoveGenUtil::kingMoves_[i];
+			
+			int rank = i / 8;
+			if (rank < 6)
+			{
+				whiteKingZoneMask |= whiteKingZoneMask << 8;
+			}
+			if (rank > 1)
+			{
+				blackKingZoneMask |= blackKingZoneMask >> 8;
+			}
+
+			kingZoneMask_[0][i] = whiteKingZoneMask;
+			kingZoneMask_[1][i] = blackKingZoneMask;
 		}
 
 		for (int square = 0; square < 64; square++)

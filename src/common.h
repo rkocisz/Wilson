@@ -32,6 +32,8 @@ constexpr int doubledPawnPentalty = 12;
 constexpr int isolatedPawnPentalty = 15;
 constexpr int pawnShieldPenalty = 12;
 
+const int KingAttackWeights[8] = { 0, 0, 50, 150, 300, 500, 700, 900 };
+
 constexpr int whitePassedPawnBonus[64] = 
 {
      0,  0,  0,  0,  0,  0,  0,  0,
