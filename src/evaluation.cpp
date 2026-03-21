@@ -12,8 +12,8 @@ namespace Eval
 		int mgTable_[12][64];
 		int egTable_[12][64];
 	
-		int mgValue_[6] = {20000, 1025, 477, 365, 337, 82};
-		int egValue_[6] = {20000, 936, 512, 297, 281, 94};
+		int mgValue_[6] = {0, 1025, 477, 365, 337, 82};
+		int egValue_[6] = {0, 936, 512, 297, 281, 94};
 
 		int gamePhaseValue_[6] = {0, 4, 2, 1, 1, 0};
 		int gamePhase_;
@@ -28,6 +28,9 @@ namespace Eval
 		uint64_t blackQueenSideCastleAreaMask = 0ULL;
 
 		uint64_t kingZoneMask_[2][64];
+
+		int unitsAttackingWhiteKingZone = 0;
+		int unitsAttackingBlackKingZone = 0;
 
 		int evaluateMaterial(const Board& board)
 		{
@@ -135,6 +138,15 @@ namespace Eval
 		uint64_t whiteQueens = board.bitBoards_[PieceType::whiteQueen];
 		uint64_t blackQueens = board.bitBoards_[PieceType::blackQueen];
 
+		uint64_t whiteKingMask = board.bitBoards_[PieceType::whiteKing];
+		uint64_t blackKingMask = board.bitBoards_[PieceType::blackKing];
+
+		unitsAttackingWhiteKingZone = 0;
+		unitsAttackingBlackKingZone = 0;
+
+		int whiteKingPos = 63 - Util::popLSB(whiteKingMask);
+		int blackKingPos = 63 - Util::popLSB(blackKingMask);
+
 		if (Util::bitCount(board.bitBoards_[PieceType::whiteBishop]) >= 2)
 			eval += 30;
 
@@ -147,6 +159,11 @@ namespace Eval
 
 			uint64_t moves = MoveGenUtil::knightMoves_[pos] & ~board.whitePieces_;
 			eval += (Util::bitCount(moves) - 4) * 4;
+
+			if (moves & kingZoneMask_[1][blackKingPos])
+			{
+				unitsAttackingBlackKingZone += kingAttackingPieceUnits[0];
+			}
 		}
 		while (blackKnights)
 		{
@@ -154,6 +171,11 @@ namespace Eval
 
 			uint64_t moves = MoveGenUtil::knightMoves_[pos] & ~board.blackPieces_;
 			eval -= (Util::bitCount(moves) - 4) * 4;
+
+			if (moves & kingZoneMask_[0][whiteKingPos])
+			{
+				unitsAttackingWhiteKingZone += kingAttackingPieceUnits[0];
+			}
 		}
 
 		while (whiteBishops)
@@ -162,6 +184,19 @@ namespace Eval
 
 			uint64_t moves = MoveGenUtil::getBishopMoves(pos, board.allPieces_) & ~board.whitePieces_;
 			eval += (Util::bitCount(moves) - 5) * 3;
+
+			if (moves & kingZoneMask_[1][blackKingPos])
+			{
+				unitsAttackingBlackKingZone += kingAttackingPieceUnits[1];
+			}
+			else
+			{
+				uint64_t xrayMoves = MoveGenUtil::getBishopMoves(pos, 0ULL);
+				if (xrayMoves & kingZoneMask_[1][blackKingPos])
+				{
+					unitsAttackingBlackKingZone += kingAttackingPieceUnits[1] / 2;
+				}
+			}
 		}
 		while (blackBishops)
 		{
@@ -169,6 +204,19 @@ namespace Eval
 
 			uint64_t moves = MoveGenUtil::getBishopMoves(pos, board.allPieces_) & ~board.blackPieces_;
 			eval -= (Util::bitCount(moves) - 5) * 3;
+
+			if (moves & kingZoneMask_[0][whiteKingPos])
+			{
+				unitsAttackingWhiteKingZone += kingAttackingPieceUnits[1];
+			}
+			else
+			{
+				uint64_t xrayMoves = MoveGenUtil::getBishopMoves(pos, 0ULL);
+				if (xrayMoves & kingZoneMask_[0][whiteKingPos])
+				{
+					unitsAttackingWhiteKingZone += kingAttackingPieceUnits[1] / 2;
+				}
+			}
 		}
 
 		while (whiteRooks)
@@ -192,6 +240,19 @@ namespace Eval
 			{
 				eval += 20;
 			}
+
+			if (moves & kingZoneMask_[1][blackKingPos])
+			{
+				unitsAttackingBlackKingZone += kingAttackingPieceUnits[2];
+			}
+			else
+			{
+				uint64_t xrayMoves = MoveGenUtil::getRookMoves(pos, 0ULL);
+				if (xrayMoves & kingZoneMask_[1][blackKingPos])
+				{
+					unitsAttackingBlackKingZone += kingAttackingPieceUnits[2] / 2;
+				}
+			}
 		}
 		while (blackRooks)
 		{
@@ -214,6 +275,19 @@ namespace Eval
 			{
 				eval -= 20;
 			}
+
+			if (moves & kingZoneMask_[0][whiteKingPos])
+			{
+				unitsAttackingWhiteKingZone += kingAttackingPieceUnits[2];
+			}
+			else
+			{
+				uint64_t xrayMoves = MoveGenUtil::getRookMoves(pos, 0ULL);
+				if (xrayMoves & kingZoneMask_[0][whiteKingPos])
+				{
+					unitsAttackingWhiteKingZone += kingAttackingPieceUnits[2] / 2;
+				}
+			}
 		}
 
 		while (whiteQueens)
@@ -222,6 +296,19 @@ namespace Eval
 
 			uint64_t moves = (MoveGenUtil::getRookMoves(pos, board.allPieces_) | MoveGenUtil::getBishopMoves(pos, board.allPieces_)) & ~board.whitePieces_;
 			eval += (Util::bitCount(moves) - 8) / 2;
+
+			if (moves & kingZoneMask_[1][blackKingPos])
+			{
+				unitsAttackingBlackKingZone += kingAttackingPieceUnits[3];
+			}
+			else
+			{
+				uint64_t xrayMoves = MoveGenUtil::getRookMoves(pos, 0ULL) | MoveGenUtil::getBishopMoves(pos, 0ULL);
+				if (xrayMoves & kingZoneMask_[1][blackKingPos])
+				{
+					unitsAttackingBlackKingZone += kingAttackingPieceUnits[3] / 2;
+				}
+			}
 		}
 		while (blackQueens)
 		{
@@ -229,17 +316,28 @@ namespace Eval
 
 			uint64_t moves = (MoveGenUtil::getRookMoves(pos, board.allPieces_) | MoveGenUtil::getBishopMoves(pos, board.allPieces_)) & ~board.blackPieces_;
 			eval -= (Util::bitCount(moves) - 8) / 2;
+
+			if (moves & kingZoneMask_[0][whiteKingPos])
+			{
+				unitsAttackingWhiteKingZone += kingAttackingPieceUnits[3];
+			}
+			else
+			{
+				uint64_t xrayMoves = MoveGenUtil::getRookMoves(pos, 0ULL) | MoveGenUtil::getBishopMoves(pos, 0ULL);
+				if (xrayMoves & kingZoneMask_[0][whiteKingPos])
+				{
+					unitsAttackingWhiteKingZone += kingAttackingPieceUnits[3] / 2;
+				}
+			}
 		}
 
 		return eval;
 	}
 
-	int evaluateKingSafety(const Board& board) // call after evaluateMaterial()
+	int evaluateKingSafety(const Board& board) // call after evaluateMaterial() and evaluatePieceStructure()
 	{
 		int eval = 0;
 		int mgVal = 0;
-		int attackUnitsAtWhiteKing = 0;
-		int attackUnitsAtBlackKing = 0;
 
 		uint64_t whiteKingMask = board.bitBoards_[PieceType::whiteKing];
 		uint64_t blackKingMask = board.bitBoards_[PieceType::blackKing];
@@ -265,6 +363,19 @@ namespace Eval
 			int pawnsInWall = Util::bitCount(blackQueenSideCastleAreaMask & board.bitBoards_[PieceType::blackPawn]);
 			mgVal += (3 - pawnsInWall) * pawnShieldPenalty;
 		}
+
+		if (unitsAttackingWhiteKingZone > 1 && unitsAttackingWhiteKingZone < 4) eval -= 20;
+		else if(unitsAttackingWhiteKingZone > 3 && unitsAttackingWhiteKingZone < 6) eval -= 80;
+		else if (unitsAttackingWhiteKingZone > 5 && unitsAttackingWhiteKingZone < 8) eval -= 200;
+		else if (unitsAttackingWhiteKingZone > 7 && unitsAttackingWhiteKingZone < 10) eval -= 450;
+		else if (unitsAttackingWhiteKingZone > 9) eval -= 850;
+
+		if (unitsAttackingBlackKingZone > 1 && unitsAttackingBlackKingZone < 4) eval += 20;
+		else if (unitsAttackingBlackKingZone > 3 && unitsAttackingBlackKingZone < 6) eval += 80;
+		else if (unitsAttackingBlackKingZone > 5 && unitsAttackingBlackKingZone < 8) eval += 200;
+		else if (unitsAttackingBlackKingZone > 7 && unitsAttackingBlackKingZone < 10) eval += 450;
+		else if (unitsAttackingBlackKingZone > 9) eval += 850;
+
 
 		eval += (mgVal * gamePhase_) / 24;
 
