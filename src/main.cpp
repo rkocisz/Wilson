@@ -114,7 +114,7 @@ void UCI()
         else if (command == "go")
         {
             Move bestMove = findBestMove(board, 5);
-            std::cout << "bestmove " << Util::moveToLAN(bestMove) << "\n";
+            std::cout << "bestmove " << Util::moveToLAN(bestMove) << std::endl;
         }
         else if (command == "quit") {
             break;

@@ -56,7 +56,7 @@ int negamax(Board& board, int depth, int alpha, int beta)
     {
         if (MoveGen::isInCheck(&board))
         {
-            return -MATE_EVAL - depth;
+            return MATE_EVAL - depth;
         }
         return 0;
     }
