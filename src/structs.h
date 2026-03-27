@@ -57,4 +57,25 @@ struct MagicInfo
 	bool operator==(const MagicInfo&) const = default;
 };
 
+struct TTEntry
+{
+	Move bestMove;
+	int depth;
+	int eval;
+
+	TTEntry(Move bestMove, int depth, int eval)
+	:bestMove(bestMove)
+	,depth(depth)
+	,eval(eval)
+	{
+	}
+
+	TTEntry()
+	{
+		bestMove = Move();
+		depth = -1;
+		eval = -1;
+	}
+};
+
 #endif 

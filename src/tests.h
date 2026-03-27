@@ -220,7 +220,11 @@ void searchPerft()
 
     auto start = std::chrono::high_resolution_clock::now();
     
-    findBestMove(board, 7);
+    board.makeMove(findBestMove(board, 6));
+    board.makeMove(findBestMove(board, 6));
+    board.makeMove(findBestMove(board, 6));
+    board.makeMove(findBestMove(board, 6));
+    board.makeMove(findBestMove(board, 6));
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;

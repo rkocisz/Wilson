@@ -3,6 +3,7 @@
 
 #include <random>
 #include <cinttypes>
+#include <unordered_map>
 #include "enums.h"
 #include "board.h"
 
@@ -18,6 +19,7 @@ namespace Util
 	Move LANToMove(std::string moveStr, Board& board);
 
 	extern const char* piecesEmotes_[12];
+	extern std::unordered_map<uint64_t, TTEntry> transpositionTable;
 }
 
 

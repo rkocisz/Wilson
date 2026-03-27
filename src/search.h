@@ -45,6 +45,14 @@
 
 int negamax(Board& board, int depth, int alpha, int beta)
 {
+	int zobristKey = board.getZobristKey();
+	auto findTtEntry = Util::transpositionTable.find(zobristKey);
+
+	if (findTtEntry != Util::transpositionTable.end() && findTtEntry->second.depth >= depth)
+	{
+		return findTtEntry->second.eval;
+	}
+
     if (depth == 0)
     {
         return Eval::evaluate(board);
@@ -56,6 +64,7 @@ int negamax(Board& board, int depth, int alpha, int beta)
     {
         if (MoveGen::isInCheck(&board))
         {
+			
             return MATE_EVAL - depth;
         }
         return 0;

@@ -16,6 +16,6 @@ nodes per second: 20355375
 SEARCH PERFT
 -----------------------------------------
 alpha-beta:
-searchPerft took: 39.2804 seconds
+searchPerft took: 118.371 seconds
 
 -----------------------------------------
