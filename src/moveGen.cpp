@@ -557,7 +557,7 @@ namespace MoveGen
 			}
 		}
 
-		
+		return false;
 	}
 }
 

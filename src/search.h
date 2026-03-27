@@ -65,7 +65,16 @@ int negamax(Board& board, int depth, int alpha, int beta)
     {
         board.makeMove(move);
 
-        int currentEval = -negamax(board, depth - 1, -beta, -alpha);
+		int currentEval = 0;
+
+		if (board.isPositionRepeatedThrice())
+		{
+			currentEval = 0;
+		}
+		else
+		{
+			currentEval = -negamax(board, depth - 1, -beta, -alpha);
+		}
 
         board.unmakeMove(move);
 

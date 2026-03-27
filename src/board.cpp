@@ -284,12 +284,6 @@ void Board::makeMove(Move move)
 	allPieces_ = whitePieces_ | blackPieces_;
 
 	positionHistory_.push_back(zobristKey_);
-
-	if (isPositionRepeatedThrice())
-	{
-		gameState_ = GameState::draw;
-		std::cerr << "position repeated 3 times";
-	}
 }
 
 void Board::unmakeMove(Move move)

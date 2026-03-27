@@ -1,3 +1,5 @@
+PERFT
+-----------------------------------------
 ray tracing:
 perft took: 10.7823 seconds
 nodes per second: 11512612
@@ -9,3 +11,11 @@ nodes per second: 20238919
 after move generation in diffrent file:
 perft took: 6.09827 seconds
 nodes per second: 20355375
+-----------------------------------------
+
+SEARCH PERFT
+-----------------------------------------
+alpha-beta:
+searchPerft took: 39.2804 seconds
+
+-----------------------------------------

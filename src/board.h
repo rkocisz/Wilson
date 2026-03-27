@@ -34,6 +34,8 @@ public:
 	inline const uint8_t& getCastlingRights();
 	inline const int& getEnPassantSquare();*/
 	
+	bool isPositionRepeatedThrice();
+
 	std::array<PieceType, 64> boardArray_;
 	std::array<uint64_t, 12> bitBoards_;
 	uint64_t whitePieces_;
@@ -49,9 +51,7 @@ public:
 private:
 	void initZobrist();
 	uint64_t computeZobrist();
-	bool isPositionRepeatedThrice();
 
-	
 	int halfmoveClock_;
 	std::vector<uint64_t> positionHistory_;
 	std::stack<UnmakeInfo> unmakeStack_;

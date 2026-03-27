@@ -7,6 +7,7 @@
 #include "common.h"
 #include "evaluation.h"
 #include "util.h";
+#include "search.h"
 
 #include <cassert>
 #include <iostream>
@@ -211,8 +212,20 @@ void testEval()
     {
         std::cout << "Test NOT passed!\n";
     }
+}
 
+void searchPerft()
+{
+    Board board;
+
+    auto start = std::chrono::high_resolution_clock::now();
     
+    findBestMove(board, 7);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end - start;
+
+    std::cout << "searchPerft took: " << elapsed.count() << " seconds\n";
 }
 
 #endif
