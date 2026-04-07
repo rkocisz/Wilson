@@ -18,4 +18,7 @@ SEARCH PERFT
 alpha-beta:
 searchPerft took: 118.371 seconds
 
+TT:
+searchPerft took: 64.7103 seconds
+
 -----------------------------------------

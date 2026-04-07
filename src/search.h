@@ -64,11 +64,20 @@ int negamax(Board& board, int depth, int alpha, int beta)
     {
         if (MoveGen::isInCheck(&board))
         {
-			
+			Util::transpositionTable[zobristKey].eval = MATE_EVAL - depth;
+			Util::transpositionTable[zobristKey].depth = INT64_MAX;
             return MATE_EVAL - depth;
         }
-        return 0;
+		else
+		{
+			Util::transpositionTable[zobristKey].eval = 0;
+			Util::transpositionTable[zobristKey].depth = INT64_MAX;
+			return 0;
+		}
     }
+
+	int maxEval = -EVAL_INFINITY;
+	Move bestMove = Move();
 
     for (const Move& move : legalMoves)
     {
@@ -87,8 +96,19 @@ int negamax(Board& board, int depth, int alpha, int beta)
 
         board.unmakeMove(move);
 
+		if (currentEval > maxEval)
+		{
+			maxEval = currentEval;
+			bestMove = move;
+		}
+
         if (currentEval >= beta)
         {
+			auto& entry = Util::transpositionTable[zobristKey];
+			entry.eval = currentEval;
+			entry.depth = depth;
+			entry.bestMove = bestMove;
+
             return beta;
         }
 
@@ -97,6 +117,11 @@ int negamax(Board& board, int depth, int alpha, int beta)
             alpha = currentEval;
         }
     }
+
+	auto& entry = Util::transpositionTable[zobristKey];
+	entry.eval = alpha;
+	entry.depth = depth;
+	entry.bestMove = bestMove;
 
     return alpha;
 }
