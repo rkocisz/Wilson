@@ -113,7 +113,7 @@ void UCI()
         }
         else if (command == "go")
         {
-            Move bestMove = findBestMove(board, 6);
+            Move bestMove = findBestMove(board, 7);
             std::cout << "bestmove " << Util::moveToLAN(bestMove) << std::endl;
         }
         else if (command == "quit") 
@@ -139,11 +139,11 @@ int main()
     //thriceRepetitionTest();
     //perft();
     //testEval();
-    searchPerft();
+    //searchPerft();
 
     //playAsWhite();
 
-    //UCI();
+    UCI();
 
     return 0;
 }

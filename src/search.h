@@ -76,12 +76,33 @@ int negamax(Board& board, int depth, int alpha, int beta)
 		}
     }
 
+	if (findTtEntry != Util::transpositionTable.end() && findTtEntry->second.depth < depth)
+	{
+		Eval::scoreMoves(legalMoves, findTtEntry->second.bestMove);
+	}
+	else
+	{
+		Eval::scoreMoves(legalMoves, Move());
+	}
+
 	int maxEval = -EVAL_INFINITY;
 	Move bestMove = Move();
 
-    for (const Move& move : legalMoves)
+    for (int i = 0; i < legalMoves.size(); i++)
     {
-        board.makeMove(move);
+		int bestMoveIndex = i;
+
+		for (int j = i + 1; j < legalMoves.size(); j++)
+		{
+			if (legalMoves[j].score > legalMoves[bestMoveIndex].score)
+			{
+				bestMoveIndex = j;
+			}
+		}
+
+		std::swap(legalMoves[i], legalMoves[bestMoveIndex]);
+
+        board.makeMove(legalMoves[i]);
 
 		int currentEval = 0;
 
@@ -94,12 +115,12 @@ int negamax(Board& board, int depth, int alpha, int beta)
 			currentEval = -negamax(board, depth - 1, -beta, -alpha);
 		}
 
-        board.unmakeMove(move);
+        board.unmakeMove(legalMoves[i]);
 
 		if (currentEval > maxEval)
 		{
 			maxEval = currentEval;
-			bestMove = move;
+			bestMove = legalMoves[i];
 		}
 
         if (currentEval >= beta)

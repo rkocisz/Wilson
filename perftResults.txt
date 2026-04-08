@@ -21,4 +21,7 @@ searchPerft took: 118.371 seconds
 TT:
 searchPerft took: 64.7103 seconds
 
+TT + Move ordering:
+searchPerft took: 18.2181 seconds
+
 -----------------------------------------

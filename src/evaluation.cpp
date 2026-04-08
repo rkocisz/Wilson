@@ -468,4 +468,23 @@ namespace Eval
 
 		return (board.sideToMove_ == Color::white) ? eval : -eval;
 	}
+
+	void scoreMoves(std::vector<Move>& moves, Move ttBestMove)
+	{
+		for (Move& move : moves)
+		{
+			if (move == ttBestMove)
+			{
+				move.score = 2000000;
+			}
+			else if (move.captured != PieceType::empty)
+			{
+				move.score = 100000 + mgValue_[move.captured % 6] * 10 - mgValue_[move.moved % 6];
+			}
+			else
+			{
+				move.score = 0;
+			}
+		}
+	}
 }

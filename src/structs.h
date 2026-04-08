@@ -13,6 +13,7 @@ struct Move
 	PieceType captured;
 	PieceType promotion;
 	MoveType moveType;
+	int score;
 
 	bool operator==(const Move&) const = default; 
 
@@ -23,6 +24,7 @@ struct Move
 	, captured(captured)
 	, promotion(promotion)
 	, moveType(moveType)
+	, score(0)
 	{ 
 	}
 
@@ -33,6 +35,7 @@ struct Move
 	, captured(PieceType::empty)
 	, promotion(PieceType::empty)
 	, moveType(MoveType::normal)
+	, score(0)
 	{
 	}
 };
