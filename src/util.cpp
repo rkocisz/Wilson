@@ -17,7 +17,8 @@ namespace Util
 		"\xE2\x99\x94", "\xE2\x99\x95", "\xE2\x99\x96", "\xE2\x99\x97", "\xE2\x99\x98", "\xE2\x99\x99"
 	};
 
-	std::unordered_map<uint64_t, TTEntry> transpositionTable;
+	//std::unordered_map<uint64_t, TTEntry> transpositionTable;
+	std::array<TTEntry, TT_SIZE> transpositionTable;
 
 	namespace
 	{

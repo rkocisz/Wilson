@@ -24,6 +24,9 @@ constexpr uint64_t RANK_8 = 0xFF00000000000000ULL;
 constexpr uint64_t fileMasks[8] = {FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H};
 constexpr uint64_t adjacentFileMasks[8] = {FILE_B , FILE_A | FILE_C, FILE_B | FILE_D, FILE_C | FILE_E, FILE_D | FILE_F, FILE_E | FILE_G, FILE_F | FILE_H, FILE_G};
 
+constexpr int TT_SIZE = 1 << 23;
+constexpr int TT_INDEX_MASK = TT_SIZE - 1;
+
 //eval
 constexpr int mg_value[6] = { 82, 337, 365, 477, 1025,  0 };
 constexpr int eg_value[6] = { 94, 281, 297, 512,  936,  0 };

@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include "enums.h"
 #include "board.h"
+#include "common.h"
 
 namespace Util
 {
@@ -19,7 +20,8 @@ namespace Util
 	Move LANToMove(std::string moveStr, Board& board);
 
 	extern const char* piecesEmotes_[12];
-	extern std::unordered_map<uint64_t, TTEntry> transpositionTable;
+	//extern std::unordered_map<uint64_t, TTEntry> transpositionTable;
+	extern std::array<TTEntry, TT_SIZE> transpositionTable;
 }
 
 

@@ -65,19 +65,22 @@ struct TTEntry
 	Move bestMove;
 	int depth;
 	int eval;
+	uint64_t zobristKey;
 
-	TTEntry(Move bestMove, int depth, int eval)
+	TTEntry(Move bestMove, int depth, int eval, uint64_t zobristKey)
 	:bestMove(bestMove)
 	,depth(depth)
 	,eval(eval)
+	,zobristKey(zobristKey)
 	{
 	}
 
 	TTEntry()
+	:bestMove(Move())
+	,depth(-1)
+	,eval(-1)
+	,zobristKey(0)
 	{
-		bestMove = Move();
-		depth = -1;
-		eval = -1;
 	}
 };
 

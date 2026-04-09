@@ -7,50 +7,18 @@
 #include "common.h"
 
 #include <algorithm>
+#include <iostream>
 
-//int negamax(Board& board, int depth)
-//{
-//	if (depth == 0)
-//	{
-//		return Eval::evaluate(board);
-//	}
-//
-//	int maxEval = -EVAL_INFINITY;
-//	std::vector<Move> legalMoves = MoveGen::generateLegalMoves(&board);
-//
-//	if (legalMoves.size() == 0)
-//	{
-//		if (MoveGen::isInCheck(&board))
-//		{
-//			return MATE_EVAL;
-//		}
-//		else
-//		{
-//			return 0;
-//		}
-//	}
-//
-//	for (const Move& move : legalMoves)
-//	{
-//		board.makeMove(move);
-//		int currentEval = -negamax(board, depth - 1);
-//
-//		board.unmakeMove(move);
-//
-//		maxEval = (std::max)(maxEval, currentEval);
-//	}
-//
-//	return maxEval;
-//}
 
 int negamax(Board& board, int depth, int alpha, int beta)
 {
 	int zobristKey = board.getZobristKey();
-	auto findTtEntry = Util::transpositionTable.find(zobristKey);
+	int TTIndex = zobristKey & TT_INDEX_MASK;
 
-	if (findTtEntry != Util::transpositionTable.end() && findTtEntry->second.depth >= depth)
+
+	if (Util::transpositionTable[TTIndex].zobristKey == zobristKey && Util::transpositionTable[TTIndex].depth >= depth)
 	{
-		return findTtEntry->second.eval;
+		return Util::transpositionTable[TTIndex].eval;
 	}
 
     if (depth == 0)
@@ -64,26 +32,25 @@ int negamax(Board& board, int depth, int alpha, int beta)
     {
         if (MoveGen::isInCheck(&board))
         {
-			Util::transpositionTable[zobristKey].eval = MATE_EVAL - depth;
-			Util::transpositionTable[zobristKey].depth = INT64_MAX;
+			Util::transpositionTable[TTIndex].eval = MATE_EVAL - depth;
+			Util::transpositionTable[TTIndex].depth = INT64_MAX;
             return MATE_EVAL - depth;
         }
 		else
 		{
-			Util::transpositionTable[zobristKey].eval = 0;
-			Util::transpositionTable[zobristKey].depth = INT64_MAX;
+			Util::transpositionTable[TTIndex].eval = 0;
+			Util::transpositionTable[TTIndex].depth = INT64_MAX;
 			return 0;
 		}
     }
 
-	if (findTtEntry != Util::transpositionTable.end() && findTtEntry->second.depth < depth)
+	Move ttMove = Move();
+	if (Util::transpositionTable[TTIndex].zobristKey == zobristKey)
 	{
-		Eval::scoreMoves(legalMoves, findTtEntry->second.bestMove);
+		ttMove = Util::transpositionTable[TTIndex].bestMove;
 	}
-	else
-	{
-		Eval::scoreMoves(legalMoves, Move());
-	}
+	Eval::scoreMoves(legalMoves, ttMove);
+
 
 	int maxEval = -EVAL_INFINITY;
 	Move bestMove = Move();
@@ -125,10 +92,11 @@ int negamax(Board& board, int depth, int alpha, int beta)
 
         if (currentEval >= beta)
         {
-			auto& entry = Util::transpositionTable[zobristKey];
+			auto& entry = Util::transpositionTable[TTIndex];
 			entry.eval = currentEval;
 			entry.depth = depth;
 			entry.bestMove = bestMove;
+			entry.zobristKey = zobristKey;
 
             return beta;
         }
@@ -139,10 +107,11 @@ int negamax(Board& board, int depth, int alpha, int beta)
         }
     }
 
-	auto& entry = Util::transpositionTable[zobristKey];
+	auto& entry = Util::transpositionTable[TTIndex];
 	entry.eval = alpha;
 	entry.depth = depth;
 	entry.bestMove = bestMove;
+	entry.zobristKey = zobristKey;
 
     return alpha;
 }
