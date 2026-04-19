@@ -27,10 +27,6 @@ constexpr uint64_t adjacentFileMasks[8] = {FILE_B , FILE_A | FILE_C, FILE_B | FI
 constexpr int TT_SIZE = 1 << 23;
 constexpr int TT_INDEX_MASK = TT_SIZE - 1;
 
-//eval
-constexpr int mg_value[6] = { 82, 337, 365, 477, 1025,  0 };
-constexpr int eg_value[6] = { 94, 281, 297, 512,  936,  0 };
-
 constexpr int doubledPawnPentalty = 12;
 constexpr int isolatedPawnPentalty = 15;
 constexpr int pawnShieldPenalty = 12;
@@ -40,8 +36,8 @@ constexpr int kingAttackingPieceUnits[4] = {2, 2, 3, 5};
 constexpr int whitePassedPawnBonus[64] = 
 {
      0,  0,  0,  0,  0,  0,  0,  0,
-    100,100,100,100,100,100,100,100,
-    60, 60, 60, 60, 60, 60, 60, 60,
+    70, 70, 70, 70, 70, 70, 70, 70,
+    50, 50, 50, 50, 50, 50, 50, 50,
     35, 35, 35, 35, 35, 35, 35, 35,
     20, 20, 20, 20, 20, 20, 20, 20,
     10, 10, 10, 10, 10, 10, 10, 10,
@@ -56,8 +52,8 @@ constexpr int blackPassedPawnBonus[64] =
     10, 10, 10, 10, 10, 10, 10, 10,
     20, 20, 20, 20, 20, 20, 20, 20,
     35, 35, 35, 35, 35, 35, 35, 35,
-    60, 60, 60, 60, 60, 60, 60, 60,
-   100,100,100,100,100,100,100,100,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    70, 70, 70, 70, 70, 70, 70, 70,
      0,  0,  0,  0,  0,  0,  0,  0
 };
 

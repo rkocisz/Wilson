@@ -139,11 +139,11 @@ int main()
     //thriceRepetitionTest();
     //perft();
     //testEval();
-    searchPerft();
+    //searchPerft();
 
     //playAsWhite();
 
-    //UCI();
+    UCI();
 
     return 0;
 }

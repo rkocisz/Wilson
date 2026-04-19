@@ -4,6 +4,7 @@
 #include "common.h"
 #include "util.h"
 #include "board.h"
+#include "evaluation.h"
 
 Board::Board()
 : castlingRights_(15)
@@ -24,6 +25,8 @@ Board::Board()
 	initZobrist();
 	zobristKey_ = computeZobrist();
 	positionHistory_.push_back(zobristKey_);
+
+	eval_ = Eval::evaluate(*this);
 }
 
 void Board::makeMove(Move move)

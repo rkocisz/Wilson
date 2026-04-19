@@ -46,6 +46,9 @@ public:
 	int enPassantSquare_;
 	Color sideToMove_;
 
+	int eval_;
+	int gamePhase_;
+
 	GameState gameState_;
 
 private:

@@ -49,8 +49,6 @@ namespace Eval
 					mgVal += mgTable_[i][pos];
 					egVal += egTable_[i][pos];
 
-
-					//std::cout << Util::piecesEmotes_[i] << ":" << mgTable_[i][pos] << "\n";
 					gamePhase_ += gamePhaseValue_[i];
 				}
 
@@ -457,7 +455,7 @@ namespace Eval
 		blackQueenSideCastleAreaMask |= (blackQueenSideCastleAreaMask >> 8) | (blackQueenSideCastleAreaMask >> 16);
 	}
 
-	int evaluate(const Board& board)
+	int evaluate(Board& board)
 	{
 		int eval = 0;
 
@@ -466,7 +464,16 @@ namespace Eval
 		eval += evaluatePawnStructure(board);
 		eval += evaluateKingSafety(board);
 
+		board.gamePhase_ = gamePhase_;
+
 		return (board.sideToMove_ == Color::white) ? eval : -eval;
+	}
+
+	int updateEval(Board& board, const Move& move)
+	{
+		int eval = board.eval_;
+
+		return eval;
 	}
 
 	void scoreMoves(std::vector<Move>& moves, Move ttBestMove)

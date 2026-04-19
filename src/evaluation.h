@@ -6,6 +6,7 @@
 namespace Eval
 {
 	int evaluate(const Board& board);
+	int updateEval(Board& board, const Move& move);
 	void scoreMoves(std::vector<Move>& moves, Move ttBestMove);
 	void init();
 }
