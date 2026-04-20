@@ -47,6 +47,9 @@ public:
 	Color sideToMove_;
 
 	int eval_;
+	int structureEval_;
+	int mgVal_;
+	int egVal_;
 	int gamePhase_;
 
 	GameState gameState_;

@@ -16,7 +16,6 @@ namespace Eval
 		int egValue_[6] = {0, 936, 512, 297, 281, 94};
 
 		int gamePhaseValue_[6] = {0, 4, 2, 1, 1, 0};
-		int gamePhase_;
 
 		uint64_t whitePassedPawnMask_[64];
 		uint64_t blackPassedPawnMask_[64];
@@ -32,11 +31,9 @@ namespace Eval
 		int unitsAttackingWhiteKingZone = 0;
 		int unitsAttackingBlackKingZone = 0;
 
-		int evaluateMaterial(const Board& board)
+		int evaluateMaterial(Board& board)
 		{
-			int mgVal = 0;
-			int egVal = 0;
-			gamePhase_ = 0;
+			board.gamePhase_ = 0;
 
 			for (int i = 0; i < 6; i++)
 			{
@@ -49,7 +46,7 @@ namespace Eval
 					mgVal += mgTable_[i][pos];
 					egVal += egTable_[i][pos];
 
-					gamePhase_ += gamePhaseValue_[i];
+					board.gamePhase_ += gamePhaseValue_[i];
 				}
 
 				int blackPieceIndex = i + 6;
@@ -62,26 +59,24 @@ namespace Eval
 					mgVal -= mgTable_[blackPieceIndex][pos];
 					egVal -= egTable_[blackPieceIndex][pos];
 
-					gamePhase_ += gamePhaseValue_[i];
+					board.gamePhase_ += gamePhaseValue_[i];
 				}
 			}
 
-			if (gamePhase_ > 24)
-				gamePhase_ = 24;
+			if (board.gamePhase_ > 24)
+				board.gamePhase_ = 24;
 
-			return (mgVal * gamePhase_ + egVal * (24 - gamePhase_)) / 24;
+			return (mgVal * board.gamePhase_ + egVal * (24 - board.gamePhase_)) / 24;
 		}
 
 
-		int evaluatePawnStructure(const Board& board)
+		void evaluatePawnStructure(Board& board)
 		{
-			int eval = 0;
-
 			int doubledWhitePawnCount = Util::bitCount(board.bitBoards_[PieceType::whitePawn] & (board.bitBoards_[PieceType::whitePawn] >> 8));
 			int doubledBlackPawnCount = Util::bitCount(board.bitBoards_[PieceType::blackPawn] & (board.bitBoards_[PieceType::blackPawn] << 8));
 
-			eval -= doubledPawnPentalty * (doubledWhitePawnCount);
-			eval += doubledPawnPentalty * (doubledBlackPawnCount);
+			board.eval_ -= doubledPawnPentalty * (doubledWhitePawnCount);
+			board.eval_ += doubledPawnPentalty * (doubledBlackPawnCount);
 
 			uint64_t whitePawns = board.bitBoards_[PieceType::whitePawn];
 			uint64_t blackPawns = board.bitBoards_[PieceType::blackPawn];
@@ -93,12 +88,12 @@ namespace Eval
 				
 				if (!(adjacentFileMasks[file] & board.bitBoards_[PieceType::whitePawn]))
 				{
-					eval -= isolatedPawnPentalty;
+					board.eval_ -= isolatedPawnPentalty;
 				}
 
 				if (!(whitePassedPawnMask_[pos] & board.bitBoards_[PieceType::blackPawn]))
 				{
-					eval += whitePassedPawnBonus[pos];
+					board.eval_ += whitePassedPawnBonus[pos];
 				}
 			}
 			while (blackPawns)
@@ -108,22 +103,19 @@ namespace Eval
 
 				if (!(adjacentFileMasks[file] & board.bitBoards_[PieceType::blackPawn]))
 				{
-					eval += isolatedPawnPentalty;
+					board.eval_ += isolatedPawnPentalty;
 				}
 				if (!(blackPassedPawnMask_[pos] & board.bitBoards_[PieceType::whitePawn]))
 				{
-					eval -= blackPassedPawnBonus[pos];
+					board.eval_ -= blackPassedPawnBonus[pos];
 				}
 			}
-
-			return eval;
 		}
 	}
 
 
-	int evaluatePieceStructure(const Board& board)
+	void evaluatePieceStructure(Board& board)
 	{
-		int eval = 0;
 		uint64_t whiteKnights = board.bitBoards_[PieceType::whiteKnight];
 		uint64_t blackKnights = board.bitBoards_[PieceType::blackKnight];
 
@@ -146,17 +138,17 @@ namespace Eval
 		int blackKingPos = 63 - Util::popLSB(blackKingMask);
 
 		if (Util::bitCount(board.bitBoards_[PieceType::whiteBishop]) >= 2)
-			eval += 30;
+			board.eval_ += 30;
 
 		if (Util::bitCount(board.bitBoards_[PieceType::blackBishop]) >= 2)
-			eval -= 30;
+			board.eval_ -= 30;
 
 		while (whiteKnights)
 		{
 			int pos = 63 - Util::popLSB(whiteKnights);
 
 			uint64_t moves = MoveGenUtil::knightMoves_[pos] & ~board.whitePieces_;
-			eval += (Util::bitCount(moves) - 4) * 4;
+			board.eval_ += (Util::bitCount(moves) - 4) * 4;
 
 			if (moves & kingZoneMask_[1][blackKingPos])
 			{
@@ -168,7 +160,7 @@ namespace Eval
 			int pos = 63 - Util::popLSB(blackKnights);
 
 			uint64_t moves = MoveGenUtil::knightMoves_[pos] & ~board.blackPieces_;
-			eval -= (Util::bitCount(moves) - 4) * 4;
+			board.eval_ -= (Util::bitCount(moves) - 4) * 4;
 
 			if (moves & kingZoneMask_[0][whiteKingPos])
 			{
@@ -181,7 +173,7 @@ namespace Eval
 			int pos = 63 - Util::popLSB(whiteBishops);
 
 			uint64_t moves = MoveGenUtil::getBishopMoves(pos, board.allPieces_) & ~board.whitePieces_;
-			eval += (Util::bitCount(moves) - 5) * 3;
+			board.eval_ += (Util::bitCount(moves) - 5) * 3;
 
 			if (moves & kingZoneMask_[1][blackKingPos])
 			{
@@ -201,7 +193,7 @@ namespace Eval
 			int pos = 63 - Util::popLSB(blackBishops);
 
 			uint64_t moves = MoveGenUtil::getBishopMoves(pos, board.allPieces_) & ~board.blackPieces_;
-			eval -= (Util::bitCount(moves) - 5) * 3;
+			board.eval_ -= (Util::bitCount(moves) - 5) * 3;
 
 			if (moves & kingZoneMask_[0][whiteKingPos])
 			{
@@ -223,20 +215,20 @@ namespace Eval
 			int file = pos % 8;
 
 			uint64_t moves = MoveGenUtil::getRookMoves(pos, board.allPieces_) & ~board.whitePieces_;
-			eval += (Util::bitCount(moves) - 6) * 2;
+			board.eval_ += (Util::bitCount(moves) - 6) * 2;
 
 			if (!(fileMasks[file] & board.bitBoards_[PieceType::whitePawn]))
 			{
-				eval += 15;
+				board.eval_ += 15;
 				if (!(fileMasks[file] & board.bitBoards_[PieceType::blackPawn]))
 				{
-					eval += 10;
+					board.eval_ += 10;
 				}
 			}
 
 			if (Util::squareMask(pos) & RANK_7)
 			{
-				eval += 20;
+				board.eval_ += 20;
 			}
 
 			if (moves & kingZoneMask_[1][blackKingPos])
@@ -258,20 +250,20 @@ namespace Eval
 			int file = pos % 8;
 
 			uint64_t moves = MoveGenUtil::getRookMoves(pos, board.allPieces_) & ~board.blackPieces_;
-			eval -= (Util::bitCount(moves) - 6) * 2;
+			board.eval_ -= (Util::bitCount(moves) - 6) * 2;
 
 			if (!(fileMasks[file] & board.bitBoards_[PieceType::blackPawn]))
 			{
-				eval -= 15;
+				board.eval_ -= 15;
 				if (!(fileMasks[file] & board.bitBoards_[PieceType::whitePawn]))
 				{
-					eval -= 10;
+					board.eval_ -= 10;
 				}
 			}
 
 			if (Util::squareMask(pos) & RANK_2)
 			{
-				eval -= 20;
+				board.eval_ -= 20;
 			}
 
 			if (moves & kingZoneMask_[0][whiteKingPos])
@@ -293,7 +285,7 @@ namespace Eval
 			int pos = 63 - Util::popLSB(whiteQueens);
 
 			uint64_t moves = (MoveGenUtil::getRookMoves(pos, board.allPieces_) | MoveGenUtil::getBishopMoves(pos, board.allPieces_)) & ~board.whitePieces_;
-			eval += (Util::bitCount(moves) - 8) / 2;
+			board.eval_ += (Util::bitCount(moves) - 8) / 2;
 
 			if (moves & kingZoneMask_[1][blackKingPos])
 			{
@@ -313,7 +305,7 @@ namespace Eval
 			int pos = 63 - Util::popLSB(blackQueens);
 
 			uint64_t moves = (MoveGenUtil::getRookMoves(pos, board.allPieces_) | MoveGenUtil::getBishopMoves(pos, board.allPieces_)) & ~board.blackPieces_;
-			eval -= (Util::bitCount(moves) - 8) / 2;
+			board.eval_ -= (Util::bitCount(moves) - 8) / 2;
 
 			if (moves & kingZoneMask_[0][whiteKingPos])
 			{
@@ -328,14 +320,11 @@ namespace Eval
 				}
 			}
 		}
-
-		return eval;
 	}
 
-	int evaluateKingSafety(const Board& board) // call after evaluateMaterial() and evaluatePieceStructure()
+	void evaluateKingSafety(Board& board) // call after evaluateMaterial() and evaluatePieceStructure()
 	{
-		int eval = 0;
-		int mgVal = 0;
+		int pawnPenalty = 0;
 
 		uint64_t whiteKingMask = board.bitBoards_[PieceType::whiteKing];
 		uint64_t blackKingMask = board.bitBoards_[PieceType::blackKing];
@@ -343,41 +332,145 @@ namespace Eval
 		if (whiteKingMask & whiteKingSideCastleAreaMask)
 		{
 			int pawnsInWall = Util::bitCount(whiteKingSideCastleAreaMask& board.bitBoards_[PieceType::whitePawn]);
-			mgVal -= (3 - pawnsInWall) * pawnShieldPenalty;
+			pawnPenalty -= (3 - pawnsInWall) * pawnShieldPenalty;
 		}
 		else if(whiteKingMask & whiteQueenSideCastleAreaMask)
 		{
 			int pawnsInWall = Util::bitCount(whiteQueenSideCastleAreaMask & board.bitBoards_[PieceType::whitePawn]);
-			mgVal -= (3 - pawnsInWall) * pawnShieldPenalty;
+			pawnPenalty -= (3 - pawnsInWall) * pawnShieldPenalty;
 		}
 
 		if (blackKingMask & blackKingSideCastleAreaMask)
 		{
 			int pawnsInWall = Util::bitCount(blackKingSideCastleAreaMask & board.bitBoards_[PieceType::blackPawn]);
-			mgVal += (3 - pawnsInWall) * pawnShieldPenalty;
+			pawnPenalty += (3 - pawnsInWall) * pawnShieldPenalty;
 		}
 		else if (blackKingMask & blackQueenSideCastleAreaMask)
 		{
 			int pawnsInWall = Util::bitCount(blackQueenSideCastleAreaMask & board.bitBoards_[PieceType::blackPawn]);
-			mgVal += (3 - pawnsInWall) * pawnShieldPenalty;
+			pawnPenalty += (3 - pawnsInWall) * pawnShieldPenalty;
 		}
 
-		if (unitsAttackingWhiteKingZone > 1 && unitsAttackingWhiteKingZone < 4) eval -= 20;
-		else if(unitsAttackingWhiteKingZone > 3 && unitsAttackingWhiteKingZone < 6) eval -= 80;
-		else if (unitsAttackingWhiteKingZone > 5 && unitsAttackingWhiteKingZone < 8) eval -= 200;
-		else if (unitsAttackingWhiteKingZone > 7 && unitsAttackingWhiteKingZone < 10) eval -= 450;
-		else if (unitsAttackingWhiteKingZone > 9) eval -= 850;
+		if (unitsAttackingWhiteKingZone > 1 && unitsAttackingWhiteKingZone < 4) board.eval_ -= 20;
+		else if(unitsAttackingWhiteKingZone > 3 && unitsAttackingWhiteKingZone < 6) board.eval_ -= 80;
+		else if (unitsAttackingWhiteKingZone > 5 && unitsAttackingWhiteKingZone < 8) board.eval_ -= 200;
+		else if (unitsAttackingWhiteKingZone > 7 && unitsAttackingWhiteKingZone < 10) board.eval_ -= 450;
+		else if (unitsAttackingWhiteKingZone > 9) board.eval_ -= 850;
 
-		if (unitsAttackingBlackKingZone > 1 && unitsAttackingBlackKingZone < 4) eval += 20;
-		else if (unitsAttackingBlackKingZone > 3 && unitsAttackingBlackKingZone < 6) eval += 80;
-		else if (unitsAttackingBlackKingZone > 5 && unitsAttackingBlackKingZone < 8) eval += 200;
-		else if (unitsAttackingBlackKingZone > 7 && unitsAttackingBlackKingZone < 10) eval += 450;
-		else if (unitsAttackingBlackKingZone > 9) eval += 850;
+		if (unitsAttackingBlackKingZone > 1 && unitsAttackingBlackKingZone < 4) board.eval_ += 20;
+		else if (unitsAttackingBlackKingZone > 3 && unitsAttackingBlackKingZone < 6) board.eval_ += 80;
+		else if (unitsAttackingBlackKingZone > 5 && unitsAttackingBlackKingZone < 8) board.eval_ += 200;
+		else if (unitsAttackingBlackKingZone > 7 && unitsAttackingBlackKingZone < 10) board.eval_ += 450;
+		else if (unitsAttackingBlackKingZone > 9) board.eval_ += 850;
 
 
-		eval += (mgVal * gamePhase_) / 24;
+		board.eval_ += (pawnPenalty * board.gamePhase_) / 24;
+	}
 
-		return eval;
+	int updateMaterial(Board& board, const Move& move)
+	{
+		int evalOffset = 0;
+		int mgVal = 0;
+		int egVal = 0;
+
+		if (move.moved < 6)
+		{
+			mgVal -= mgTable_[move.moved][move.startPos];
+			mgVal += mgTable_[move.moved][move.endPos];
+			egVal -= egTable_[move.moved][move.startPos];
+			egVal += egTable_[move.moved][move.endPos];
+		
+			if (move.moveType == MoveType::longCastle)
+			{
+				mgVal -= mgTable_[PieceType::whiteRook][56];
+				mgVal += mgTable_[PieceType::whiteRook][59];
+				egVal -= egTable_[PieceType::whiteRook][56];
+				egVal += egTable_[PieceType::whiteRook][59];
+			}
+			else if (move.moveType == MoveType::shortCastle)
+			{
+				mgVal -= mgTable_[PieceType::whiteRook][63];
+				mgVal += mgTable_[PieceType::whiteRook][61];
+				egVal -= egTable_[PieceType::whiteRook][63];
+				egVal += egTable_[PieceType::whiteRook][61];
+			}
+			else if (move.captured != PieceType::empty && move.moveType != MoveType::enPassant)
+			{
+				mgVal += mgTable_[move.captured][move.endPos];
+				egVal += egTable_[move.captured][move.endPos];
+				board.gamePhase_ -= gamePhaseValue_[move.captured];
+			}
+			else if (move.moveType == MoveType::enPassant)
+			{
+				mgVal += mgTable_[move.captured][move.endPos + 8];
+				egVal += egTable_[move.captured][move.endPos + 8];
+				board.gamePhase_ -= gamePhaseValue_[move.captured];
+			}
+
+			if (move.promotion != PieceType::empty)
+			{
+				mgVal += mgTable_[move.promotion][move.endPos];
+				egVal += egTable_[move.promotion][move.endPos];
+			}
+		}
+		else
+		{
+			mgVal += mgTable_[move.moved % 6][move.startPos];
+			mgVal -= mgTable_[move.moved % 6][move.endPos];
+			egVal += egTable_[move.moved % 6][move.startPos];
+			egVal -= egTable_[move.moved % 6][move.endPos];
+
+			if (move.moveType == MoveType::longCastle)
+			{
+				mgVal += mgTable_[PieceType::blackRook][7];
+				mgVal -= mgTable_[PieceType::blackRook][5];
+				egVal += egTable_[PieceType::blackRook][7];
+				egVal -= egTable_[PieceType::blackRook][5];
+			}
+			else if (move.moveType == MoveType::shortCastle)
+			{
+				mgVal += mgTable_[PieceType::blackRook][0];
+				mgVal -= mgTable_[PieceType::blackRook][3];
+				egVal += egTable_[PieceType::blackRook][0];
+				egVal -= egTable_[PieceType::blackRook][3];
+			}
+			else if (move.captured != PieceType::empty && move.moveType != MoveType::enPassant)
+			{
+				mgVal -= mgTable_[move.captured][move.endPos];
+				egVal -= egTable_[move.captured][move.endPos];
+				board.gamePhase_ -= gamePhaseValue_[move.captured];
+			}
+			else if (move.moveType == MoveType::enPassant)
+			{
+				mgVal += mgTable_[move.captured][move.endPos - 8];
+				egVal += egTable_[move.captured][move.endPos - 8];
+				board.gamePhase_ -= gamePhaseValue_[move.captured % 6];
+			}
+			
+			if (move.promotion != PieceType::empty)
+			{
+				mgVal -= mgTable_[move.promotion][move.endPos];
+				egVal -= egTable_[move.promotion][move.endPos];
+			}
+		}
+
+		if (board.gamePhase_ > 24)
+			board.gamePhase_ = 24;
+
+		evalOffset = mgVal * board.gamePhase_ + egVal * (24 - board.gamePhase_) / 24;
+
+		return evalOffset;
+	}
+
+	void updatePawnStructure(Board& board, const Move& move)
+	{
+		if (move.moved == PieceType::whitePawn)
+		{
+			if (move.captured != PieceType::empty)
+			{
+
+			}
+		}
 	}
 
 	void init()
@@ -459,21 +552,19 @@ namespace Eval
 	{
 		int eval = 0;
 
-		eval += evaluateMaterial(board);
-		eval += evaluatePieceStructure(board);
-		eval += evaluatePawnStructure(board);
-		eval += evaluateKingSafety(board);
-
-		board.gamePhase_ = gamePhase_;
+		evaluateMaterial(board);
+		evaluatePieceStructure(board);
+		evaluatePawnStructure(board);
+		evaluateKingSafety(board);
 
 		return (board.sideToMove_ == Color::white) ? eval : -eval;
 	}
 
 	int updateEval(Board& board, const Move& move)
 	{
-		int eval = board.eval_;
+		updateMaterial(board, move);
 
-		return eval;
+		return (board.sideToMove_ == Color::white) ? board.eval_ : -board.eval_;
 	}
 
 	void scoreMoves(std::vector<Move>& moves, Move ttBestMove)
