@@ -46,6 +46,9 @@ struct UnmakeInfo
 	int prevEnPassantSquare;
 	int prevHalfmoveClock;
 	uint64_t prevZobristKey;
+	int prevMgVal;
+	int prevEgVal;
+	int prevGamePhase;
 
 	bool operator==(const UnmakeInfo&) const = default;
 };

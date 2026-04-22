@@ -46,8 +46,6 @@ public:
 	int enPassantSquare_;
 	Color sideToMove_;
 
-	int eval_;
-	int structureEval_;
 	int mgVal_;
 	int egVal_;
 	int gamePhase_;
@@ -61,6 +59,7 @@ private:
 	int halfmoveClock_;
 	std::vector<uint64_t> positionHistory_;
 	std::stack<UnmakeInfo> unmakeStack_;
+
 
 
 	//Zobrist

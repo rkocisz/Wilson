@@ -26,12 +26,12 @@ Board::Board()
 	zobristKey_ = computeZobrist();
 	positionHistory_.push_back(zobristKey_);
 
-	eval_ = Eval::evaluate(*this);
+	Eval::evaluate(*this);
 }
 
 void Board::makeMove(Move move)
 {
-	unmakeStack_.push(UnmakeInfo(castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_));
+	unmakeStack_.push(UnmakeInfo(castlingRights_, enPassantSquare_, halfmoveClock_, zobristKey_, mgVal_, egVal_, gamePhase_));
 
 	zobristKey_ ^= zobristSide_;
 	sideToMove_ = Util::opposite(sideToMove_);
@@ -286,6 +286,8 @@ void Board::makeMove(Move move)
 
 	allPieces_ = whitePieces_ | blackPieces_;
 
+	Eval::updateMaterial(*this, move);
+
 	positionHistory_.push_back(zobristKey_);
 }
 
@@ -299,6 +301,9 @@ void Board::unmakeMove(Move move)
 	castlingRights_ = unmakeStack_.top().prevCastlingRights;
 	enPassantSquare_ = unmakeStack_.top().prevEnPassantSquare;
 	halfmoveClock_ = unmakeStack_.top().prevHalfmoveClock;
+	mgVal_ = unmakeStack_.top().prevMgVal;
+	egVal_ = unmakeStack_.top().prevEgVal;
+	gamePhase_ = unmakeStack_.top().prevGamePhase;
 
 	unmakeStack_.pop();
 

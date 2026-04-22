@@ -140,10 +140,11 @@ int main()
     //perft();
     //testEval();
     //searchPerft();
+    testIncrementalEval();
 
     //playAsWhite();
 
-    UCI();
+    //UCI();
 
     return 0;
 }

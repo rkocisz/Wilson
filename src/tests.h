@@ -180,16 +180,6 @@ void testEval()
         std::cout << "Test NOT passed!\n";
     }
 
-    /*for (const Move& move : moves)
-    {
-        std::cout << "moved:" << Util::piecesEmotes_[move.moved] << " from: " << move.startPos << " to: " << move.endPos << "\n";
-
-        board.makeMove(move);
-        board.draw();
-        std::cout << "eval: " << Eval::evaluate(board) << "\n\n";
-        board.unmakeMove(move);
-    }*/
-
     board = Board();
     board.makeMove(moves[0]);
     int eval1 = Eval::evaluate(board);
@@ -230,6 +220,56 @@ void searchPerft()
     std::chrono::duration<double> elapsed = end - start;
 
     std::cout << "searchPerft took: " << elapsed.count() << " seconds\n";
+}
+
+
+void testIncrementalEval()
+{
+    Board board;
+
+    if (Eval::calculateUpdatedEval(board) == Eval::evaluate(board))
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+
+    Move move = MoveGen::generateLegalMoves(&board)[6];
+    board.makeMove(move);
+
+    if (Eval::calculateUpdatedEval(board) == Eval::evaluate(board))
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+
+    Move move1 = MoveGen::generateLegalMoves(&board)[5];
+    board.makeMove(move1);
+    
+    if (Eval::calculateUpdatedEval(board) == Eval::evaluate(board))
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
+    
+    board.unmakeMove(move1);
+
+    if (Eval::calculateUpdatedEval(board) == Eval::evaluate(board))
+    {
+        std::cout << "Test passed!\n";
+    }
+    else
+    {
+        std::cout << "Test NOT passed!\n";
+    }
 }
 
 #endif
