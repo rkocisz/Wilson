@@ -30,85 +30,85 @@ namespace Eval
 
 		int unitsAttackingWhiteKingZone = 0;
 		int unitsAttackingBlackKingZone = 0;
+	}
 
-		int evaluateMaterial(Board& board)
+	int evaluateMaterial(Board& board)
+	{
+		board.gamePhase_ = 0;
+
+		for (int i = 0; i < 6; i++)
 		{
-			board.gamePhase_ = 0;
+			uint64_t pieceSquares = board.bitBoards_[i];
 
-			for (int i = 0; i < 6; i++)
+			while (pieceSquares)
 			{
-				uint64_t pieceSquares = board.bitBoards_[i];
+				int pos = 63 - Util::popLSB(pieceSquares);
 
-				while (pieceSquares)
-				{
-					int pos = 63 - Util::popLSB(pieceSquares);
+				board.mgVal_ += mgTable_[i][pos];
+				board.egVal_ += egTable_[i][pos];
 
-					mgVal += mgTable_[i][pos];
-					egVal += egTable_[i][pos];
-
-					board.gamePhase_ += gamePhaseValue_[i];
-				}
-
-				int blackPieceIndex = i + 6;
-				pieceSquares = board.bitBoards_[blackPieceIndex];
-
-				while (pieceSquares)
-				{
-					int pos = 63 - Util::popLSB(pieceSquares);
-
-					mgVal -= mgTable_[blackPieceIndex][pos];
-					egVal -= egTable_[blackPieceIndex][pos];
-
-					board.gamePhase_ += gamePhaseValue_[i];
-				}
+				board.gamePhase_ += gamePhaseValue_[i];
 			}
 
-			if (board.gamePhase_ > 24)
-				board.gamePhase_ = 24;
+			int blackPieceIndex = i + 6;
+			pieceSquares = board.bitBoards_[blackPieceIndex];
 
-			return (mgVal * board.gamePhase_ + egVal * (24 - board.gamePhase_)) / 24;
+			while (pieceSquares)
+			{
+				int pos = 63 - Util::popLSB(pieceSquares);
+
+				board.mgVal_ -= mgTable_[blackPieceIndex][pos];
+				board.egVal_ -= egTable_[blackPieceIndex][pos];
+
+				board.gamePhase_ += gamePhaseValue_[i];
+			}
 		}
 
+		if (board.gamePhase_ > 24)
+			board.gamePhase_ = 24;
 
-		void evaluatePawnStructure(Board& board)
-		{
-			int doubledWhitePawnCount = Util::bitCount(board.bitBoards_[PieceType::whitePawn] & (board.bitBoards_[PieceType::whitePawn] >> 8));
-			int doubledBlackPawnCount = Util::bitCount(board.bitBoards_[PieceType::blackPawn] & (board.bitBoards_[PieceType::blackPawn] << 8));
+		return (board.mgVal_ * board.gamePhase_ + board.egVal_ * (24 - board.gamePhase_)) / 24;
+	}
 
-			board.eval_ -= doubledPawnPentalty * (doubledWhitePawnCount);
-			board.eval_ += doubledPawnPentalty * (doubledBlackPawnCount);
 
-			uint64_t whitePawns = board.bitBoards_[PieceType::whitePawn];
-			uint64_t blackPawns = board.bitBoards_[PieceType::blackPawn];
+	void evaluatePawnStructure(Board& board)
+	{
+		int doubledWhitePawnCount = Util::bitCount(board.bitBoards_[PieceType::whitePawn] & (board.bitBoards_[PieceType::whitePawn] >> 8));
+		int doubledBlackPawnCount = Util::bitCount(board.bitBoards_[PieceType::blackPawn] & (board.bitBoards_[PieceType::blackPawn] << 8));
+
+		board.eval_ -= doubledPawnPentalty * (doubledWhitePawnCount);
+		board.eval_ += doubledPawnPentalty * (doubledBlackPawnCount);
+
+		uint64_t whitePawns = board.bitBoards_[PieceType::whitePawn];
+		uint64_t blackPawns = board.bitBoards_[PieceType::blackPawn];
 			
-			while (whitePawns)
-			{
-				int pos = 63 - Util::popLSB(whitePawns);
-				int file = pos % 8;
+		while (whitePawns)
+		{
+			int pos = 63 - Util::popLSB(whitePawns);
+			int file = pos % 8;
 				
-				if (!(adjacentFileMasks[file] & board.bitBoards_[PieceType::whitePawn]))
-				{
-					board.eval_ -= isolatedPawnPentalty;
-				}
-
-				if (!(whitePassedPawnMask_[pos] & board.bitBoards_[PieceType::blackPawn]))
-				{
-					board.eval_ += whitePassedPawnBonus[pos];
-				}
-			}
-			while (blackPawns)
+			if (!(adjacentFileMasks[file] & board.bitBoards_[PieceType::whitePawn]))
 			{
-				int pos = 63 - Util::popLSB(blackPawns);
-				int file = pos % 8;
+				board.eval_ -= isolatedPawnPentalty;
+			}
 
-				if (!(adjacentFileMasks[file] & board.bitBoards_[PieceType::blackPawn]))
-				{
-					board.eval_ += isolatedPawnPentalty;
-				}
-				if (!(blackPassedPawnMask_[pos] & board.bitBoards_[PieceType::whitePawn]))
-				{
-					board.eval_ -= blackPassedPawnBonus[pos];
-				}
+			if (!(whitePassedPawnMask_[pos] & board.bitBoards_[PieceType::blackPawn]))
+			{
+				board.eval_ += whitePassedPawnBonus[pos];
+			}
+		}
+		while (blackPawns)
+		{
+			int pos = 63 - Util::popLSB(blackPawns);
+			int file = pos % 8;
+
+			if (!(adjacentFileMasks[file] & board.bitBoards_[PieceType::blackPawn]))
+			{
+				board.eval_ += isolatedPawnPentalty;
+			}
+			if (!(blackPassedPawnMask_[pos] & board.bitBoards_[PieceType::whitePawn]))
+			{
+				board.eval_ -= blackPassedPawnBonus[pos];
 			}
 		}
 	}
@@ -369,97 +369,95 @@ namespace Eval
 
 	int updateMaterial(Board& board, const Move& move)
 	{
-		int evalOffset = 0;
-		int mgVal = 0;
-		int egVal = 0;
-
 		if (move.moved < 6)
 		{
-			mgVal -= mgTable_[move.moved][move.startPos];
-			mgVal += mgTable_[move.moved][move.endPos];
-			egVal -= egTable_[move.moved][move.startPos];
-			egVal += egTable_[move.moved][move.endPos];
+			board.mgVal_ -= mgTable_[move.moved][move.startPos];
+			board.mgVal_ += mgTable_[move.moved][move.endPos];
+			board.egVal_ -= egTable_[move.moved][move.startPos];
+			board.egVal_ += egTable_[move.moved][move.endPos];
 		
 			if (move.moveType == MoveType::longCastle)
 			{
-				mgVal -= mgTable_[PieceType::whiteRook][56];
-				mgVal += mgTable_[PieceType::whiteRook][59];
-				egVal -= egTable_[PieceType::whiteRook][56];
-				egVal += egTable_[PieceType::whiteRook][59];
+				board.mgVal_ -= mgTable_[PieceType::whiteRook][56];
+				board.mgVal_ += mgTable_[PieceType::whiteRook][59];
+				board.egVal_ -= egTable_[PieceType::whiteRook][56];
+				board.egVal_ += egTable_[PieceType::whiteRook][59];
 			}
 			else if (move.moveType == MoveType::shortCastle)
 			{
-				mgVal -= mgTable_[PieceType::whiteRook][63];
-				mgVal += mgTable_[PieceType::whiteRook][61];
-				egVal -= egTable_[PieceType::whiteRook][63];
-				egVal += egTable_[PieceType::whiteRook][61];
+				board.mgVal_ -= mgTable_[PieceType::whiteRook][63];
+				board.mgVal_ += mgTable_[PieceType::whiteRook][61];
+				board.egVal_ -= egTable_[PieceType::whiteRook][63];
+				board.egVal_ += egTable_[PieceType::whiteRook][61];
 			}
 			else if (move.captured != PieceType::empty && move.moveType != MoveType::enPassant)
 			{
-				mgVal += mgTable_[move.captured][move.endPos];
-				egVal += egTable_[move.captured][move.endPos];
+				board.mgVal_ += mgTable_[move.captured][move.endPos];
+				board.egVal_ += egTable_[move.captured][move.endPos];
 				board.gamePhase_ -= gamePhaseValue_[move.captured];
 			}
 			else if (move.moveType == MoveType::enPassant)
 			{
-				mgVal += mgTable_[move.captured][move.endPos + 8];
-				egVal += egTable_[move.captured][move.endPos + 8];
+				board.mgVal_ += mgTable_[move.captured][move.endPos + 8];
+				board.egVal_ += egTable_[move.captured][move.endPos + 8];
 				board.gamePhase_ -= gamePhaseValue_[move.captured];
 			}
 
 			if (move.promotion != PieceType::empty)
 			{
-				mgVal += mgTable_[move.promotion][move.endPos];
-				egVal += egTable_[move.promotion][move.endPos];
+				board.mgVal_ += mgTable_[move.promotion][move.endPos];
+				board.egVal_ += egTable_[move.promotion][move.endPos];
+				board.mgVal_ -= mgTable_[move.moved][move.endPos];
+				board.egVal_ -= egTable_[move.moved][move.endPos];
 			}
 		}
 		else
 		{
-			mgVal += mgTable_[move.moved % 6][move.startPos];
-			mgVal -= mgTable_[move.moved % 6][move.endPos];
-			egVal += egTable_[move.moved % 6][move.startPos];
-			egVal -= egTable_[move.moved % 6][move.endPos];
+			board.mgVal_ += mgTable_[move.moved][move.startPos];
+			board.mgVal_ -= mgTable_[move.moved][move.endPos];
+			board.egVal_ += egTable_[move.moved][move.startPos];
+			board.egVal_ -= egTable_[move.moved][move.endPos];
 
 			if (move.moveType == MoveType::longCastle)
 			{
-				mgVal += mgTable_[PieceType::blackRook][7];
-				mgVal -= mgTable_[PieceType::blackRook][5];
-				egVal += egTable_[PieceType::blackRook][7];
-				egVal -= egTable_[PieceType::blackRook][5];
+				board.mgVal_ += mgTable_[PieceType::blackRook][7];
+				board.mgVal_ -= mgTable_[PieceType::blackRook][5];
+				board.egVal_ += egTable_[PieceType::blackRook][7];
+				board.egVal_ -= egTable_[PieceType::blackRook][5];
 			}
 			else if (move.moveType == MoveType::shortCastle)
 			{
-				mgVal += mgTable_[PieceType::blackRook][0];
-				mgVal -= mgTable_[PieceType::blackRook][3];
-				egVal += egTable_[PieceType::blackRook][0];
-				egVal -= egTable_[PieceType::blackRook][3];
+				board.mgVal_ += mgTable_[PieceType::blackRook][0];
+				board.mgVal_ -= mgTable_[PieceType::blackRook][3];
+				board.egVal_ += egTable_[PieceType::blackRook][0];
+				board.egVal_ -= egTable_[PieceType::blackRook][3];
 			}
 			else if (move.captured != PieceType::empty && move.moveType != MoveType::enPassant)
 			{
-				mgVal -= mgTable_[move.captured][move.endPos];
-				egVal -= egTable_[move.captured][move.endPos];
+				board.mgVal_ -= mgTable_[move.captured][move.endPos];
+				board.egVal_ -= egTable_[move.captured][move.endPos];
 				board.gamePhase_ -= gamePhaseValue_[move.captured];
 			}
 			else if (move.moveType == MoveType::enPassant)
 			{
-				mgVal += mgTable_[move.captured][move.endPos - 8];
-				egVal += egTable_[move.captured][move.endPos - 8];
+				board.mgVal_ += mgTable_[move.captured][move.endPos - 8];
+				board.egVal_ += egTable_[move.captured][move.endPos - 8];
 				board.gamePhase_ -= gamePhaseValue_[move.captured % 6];
 			}
 			
 			if (move.promotion != PieceType::empty)
 			{
-				mgVal -= mgTable_[move.promotion][move.endPos];
-				egVal -= egTable_[move.promotion][move.endPos];
+				board.mgVal_ -= mgTable_[move.promotion][move.endPos];
+				board.egVal_ -= egTable_[move.promotion][move.endPos];
+				board.mgVal_ += mgTable_[move.moved][move.endPos];
+				board.egVal_ += egTable_[move.moved][move.endPos];
 			}
 		}
 
 		if (board.gamePhase_ > 24)
 			board.gamePhase_ = 24;
 
-		evalOffset = mgVal * board.gamePhase_ + egVal * (24 - board.gamePhase_) / 24;
-
-		return evalOffset;
+		board.eval_ = board.mgVal_ * board.gamePhase_ + board.egVal_ * (24 - board.gamePhase_) / 24;
 	}
 
 	void updatePawnStructure(Board& board, const Move& move)
@@ -563,6 +561,8 @@ namespace Eval
 	int updateEval(Board& board, const Move& move)
 	{
 		updateMaterial(board, move);
+		
+		evaluatePawnStructure(board);
 
 		return (board.sideToMove_ == Color::white) ? board.eval_ : -board.eval_;
 	}

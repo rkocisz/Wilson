@@ -1,0 +1,1 @@
+aktualnie nie bedzie dzialac eval bo pracuje besposrednio na wartosciach w Board wiec trzeba dokonczyc incrementalEval
