@@ -139,8 +139,8 @@ int main()
     //thriceRepetitionTest();
     //perft();
     //testEval();
-    //searchPerft();
-    testIncrementalEval();
+    searchPerft();
+    //stestIncrementalEval();
 
     //playAsWhite();
 

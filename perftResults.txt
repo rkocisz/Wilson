@@ -27,4 +27,7 @@ searchPerft took: 18.2181 seconds
 TT as array + Move ordering:
 searchPerft took: 16.6274 seconds
 
+Incremental material eval:
+searchPerft took: 13.4808 seconds
+
 -----------------------------------------

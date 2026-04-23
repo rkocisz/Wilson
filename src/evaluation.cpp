@@ -17,8 +17,6 @@ namespace Eval
 
 		int gamePhaseValue_[6] = {0, 4, 2, 1, 1, 0};
 
-		int currentGamePhase_ = 0;
-
 		uint64_t whitePassedPawnMask_[64];
 		uint64_t blackPassedPawnMask_[64];
 
@@ -36,9 +34,9 @@ namespace Eval
 
 	int evaluateMaterial(Board& board)
 	{
-		int currentGamePhase_ = 0;
-		int mgVal = 0;
-		int egVal = 0;
+		board.gamePhase_ = 0;
+		board.mgVal_ = 0;
+		board.egVal_ = 0;
 
 		for (int i = 0; i < 6; i++)
 		{
@@ -48,10 +46,10 @@ namespace Eval
 			{
 				int pos = 63 - Util::popLSB(pieceSquares);
 
-				mgVal += mgTable_[i][pos];
-				mgVal += egTable_[i][pos];
+				board.mgVal_ += mgTable_[i][pos];
+				board.egVal_ += egTable_[i][pos];
 
-				currentGamePhase_ += gamePhaseValue_[i];
+				board.gamePhase_ += gamePhaseValue_[i];
 			}
 
 			int blackPieceIndex = i + 6;
@@ -61,20 +59,19 @@ namespace Eval
 			{
 				int pos = 63 - Util::popLSB(pieceSquares);
 
-				mgVal -= mgTable_[blackPieceIndex][pos];
-				mgVal -= egTable_[blackPieceIndex][pos];
+				board.mgVal_ -= mgTable_[blackPieceIndex][pos];
+				board.egVal_ -= egTable_[blackPieceIndex][pos];
 
-				currentGamePhase_ += gamePhaseValue_[i];
+				board.gamePhase_ += gamePhaseValue_[i];
 			}
 		}
 
-		board.mgVal_ = mgVal;
-		board.egVal_ = egVal;
+		int gamePhaseForCalculations = board.gamePhase_;
 
-		if (currentGamePhase_ > 24)
-			currentGamePhase_ = 24;
+		if (gamePhaseForCalculations > 24) gamePhaseForCalculations = 24;
+		else if (gamePhaseForCalculations < 0) gamePhaseForCalculations = 0;
 
-		return ((mgVal * currentGamePhase_ + mgVal * (24 - currentGamePhase_))) / 24;
+		return ((board.mgVal_ * gamePhaseForCalculations + board.egVal_ * (24 - gamePhaseForCalculations))) / 24;
 	}
 
 
@@ -380,7 +377,7 @@ namespace Eval
 		else if (unitsAttackingBlackKingZone > 9) eval += 850;
 
 
-		eval += (pawnPenalty * currentGamePhase_) / 24;
+		eval += (pawnPenalty * board.gamePhase_) / 24;
 		return eval;
 	}
 
@@ -548,7 +545,7 @@ namespace Eval
 		blackQueenSideCastleAreaMask |= (blackQueenSideCastleAreaMask >> 8) | (blackQueenSideCastleAreaMask >> 16);
 	}
 
-	int evaluate(Board& board) //fully evaluates the board from the start and updates the eval info in Board
+	int evaluate(Board& board)//fully evaluates the board from the start and updates the eval info in Board
 	{
 		int eval = 0;
 
@@ -557,12 +554,10 @@ namespace Eval
 		eval += evaluatePawnStructure(board);
 		eval += evaluateKingSafety(board);
 
-		board.gamePhase_ = currentGamePhase_;
-
 		return (board.sideToMove_ == Color::white) ? eval : -eval;
 	}
 
-	int calculateUpdatedEval(Board& board) //use to get current evaluation more effectively (after evaluate() is called at least once)
+	int calculateUpdatedEval(Board& board)//use to get current evaluation more effectively (after evaluate() is called at least once)
 	{
 		int eval = 0;
 
@@ -572,7 +567,6 @@ namespace Eval
 		else if (gamePhaseForCalculations < 0) gamePhaseForCalculations = 0;
 
 		eval = (board.mgVal_ * gamePhaseForCalculations + board.egVal_ * (24 - gamePhaseForCalculations)) / 24;
-		currentGamePhase_ = board.gamePhase_;
 
 		eval += evaluatePieceStructure(board);
 		eval += evaluatePawnStructure(board);
