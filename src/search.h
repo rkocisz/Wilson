@@ -23,7 +23,15 @@ int negamax(Board& board, int depth, int alpha, int beta)
 
     if (depth == 0)
     {
-        return Eval::calculateUpdatedEval(board);
+		int eval1 = Eval::calculateUpdatedEval(board);
+		int eval2 = Eval::evaluate(board);
+
+		if (eval1 != eval2)
+		{
+			std::cout << "NIE zgadza sie eval!!!!!!!!!!!!!!!!!!! incremental: " << eval1 << "static: " << eval2;
+		}
+
+        return eval1;
     }
 
     std::vector<Move> legalMoves = MoveGen::generateLegalMoves(&board);

@@ -54,7 +54,7 @@ void playAsWhite()
             break;
         }
 
-        Move bestMove = findBestMove(board, 5);
+        Move bestMove = findBestMove(board, 6);
 
         board.makeMove(bestMove);
 
@@ -139,10 +139,10 @@ int main()
     //thriceRepetitionTest();
     //perft();
     //testEval();
-    searchPerft();
-    //stestIncrementalEval();
+    //searchPerft();
+    //testIncrementalEval();
 
-    //playAsWhite();
+    playAsWhite();
 
     //UCI();
 

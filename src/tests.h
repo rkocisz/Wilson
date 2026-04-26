@@ -270,6 +270,21 @@ void testIncrementalEval()
     {
         std::cout << "Test NOT passed!\n";
     }
+
+    Board board1;
+
+    for (int i = 0; i < 10; i++)
+    {
+        board1.makeMove(MoveGen::generateLegalMoves(&board1)[0]);
+        if (Eval::calculateUpdatedEval(board1) == Eval::evaluate(board1))
+        {
+            std::cout << "Test passed!\n";
+        }
+        else
+        {
+            std::cout << "Test NOT passed!\n";
+        }
+    }
 }
 
 #endif

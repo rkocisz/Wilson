@@ -408,13 +408,13 @@ namespace Eval
 			{
 				board.mgVal_ += mgTable_[move.captured][move.endPos];
 				board.egVal_ += egTable_[move.captured][move.endPos];
-				board.gamePhase_ -= gamePhaseValue_[move.captured];
+				board.gamePhase_ += gamePhaseValue_[move.captured];
 			}
 			else if (move.moveType == MoveType::enPassant)
 			{
 				board.mgVal_ += mgTable_[move.captured][move.endPos + 8];
 				board.egVal_ += egTable_[move.captured][move.endPos + 8];
-				board.gamePhase_ -= gamePhaseValue_[move.captured];
+				board.gamePhase_ += gamePhaseValue_[move.captured];
 			}
 
 			if (move.promotion != PieceType::empty)
@@ -454,8 +454,8 @@ namespace Eval
 			}
 			else if (move.moveType == MoveType::enPassant)
 			{
-				board.mgVal_ += mgTable_[move.captured][move.endPos - 8];
-				board.egVal_ += egTable_[move.captured][move.endPos - 8];
+				board.mgVal_ -= mgTable_[move.captured][move.endPos - 8];
+				board.egVal_ -= egTable_[move.captured][move.endPos - 8];
 				board.gamePhase_ -= gamePhaseValue_[move.captured % 6];
 			}
 			
@@ -566,8 +566,7 @@ namespace Eval
 		if (gamePhaseForCalculations > 24) gamePhaseForCalculations = 24;
 		else if (gamePhaseForCalculations < 0) gamePhaseForCalculations = 0;
 
-		eval = (board.mgVal_ * gamePhaseForCalculations + board.egVal_ * (24 - gamePhaseForCalculations)) / 24;
-
+		eval += ((board.mgVal_ * gamePhaseForCalculations + board.egVal_ * (24 - gamePhaseForCalculations))) / 24;
 		eval += evaluatePieceStructure(board);
 		eval += evaluatePawnStructure(board);
 		eval += evaluateKingSafety(board);
