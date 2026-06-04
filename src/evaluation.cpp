@@ -408,13 +408,13 @@ namespace Eval
 			{
 				board.mgVal_ += mgTable_[move.captured][move.endPos];
 				board.egVal_ += egTable_[move.captured][move.endPos];
-				board.gamePhase_ += gamePhaseValue_[move.captured];
+				board.gamePhase_ += gamePhaseValue_[move.captured % 6];
 			}
 			else if (move.moveType == MoveType::enPassant)
 			{
 				board.mgVal_ += mgTable_[move.captured][move.endPos + 8];
 				board.egVal_ += egTable_[move.captured][move.endPos + 8];
-				board.gamePhase_ += gamePhaseValue_[move.captured];
+				board.gamePhase_ += gamePhaseValue_[move.captured % 6];
 			}
 
 			if (move.promotion != PieceType::empty)
@@ -423,6 +423,7 @@ namespace Eval
 				board.egVal_ += egTable_[move.promotion][move.endPos];
 				board.mgVal_ -= mgTable_[move.moved][move.endPos];
 				board.egVal_ -= egTable_[move.moved][move.endPos];
+				board.gamePhase_ += gamePhaseValue_[move.promotion % 6] - gamePhaseValue_[move.moved % 6];
 			}
 		}
 		else
@@ -434,23 +435,23 @@ namespace Eval
 
 			if (move.moveType == MoveType::longCastle)
 			{
-				board.mgVal_ += mgTable_[PieceType::blackRook][7];
-				board.mgVal_ -= mgTable_[PieceType::blackRook][5];
-				board.egVal_ += egTable_[PieceType::blackRook][7];
-				board.egVal_ -= egTable_[PieceType::blackRook][5];
-			}
-			else if (move.moveType == MoveType::shortCastle)
-			{
 				board.mgVal_ += mgTable_[PieceType::blackRook][0];
 				board.mgVal_ -= mgTable_[PieceType::blackRook][3];
 				board.egVal_ += egTable_[PieceType::blackRook][0];
 				board.egVal_ -= egTable_[PieceType::blackRook][3];
 			}
+			else if (move.moveType == MoveType::shortCastle)
+			{
+				board.mgVal_ += mgTable_[PieceType::blackRook][7];
+				board.mgVal_ -= mgTable_[PieceType::blackRook][5];
+				board.egVal_ += egTable_[PieceType::blackRook][7];
+				board.egVal_ -= egTable_[PieceType::blackRook][5];
+			}
 			else if (move.captured != PieceType::empty && move.moveType != MoveType::enPassant)
 			{
 				board.mgVal_ -= mgTable_[move.captured][move.endPos];
 				board.egVal_ -= egTable_[move.captured][move.endPos];
-				board.gamePhase_ -= gamePhaseValue_[move.captured];
+				board.gamePhase_ -= gamePhaseValue_[move.captured % 6];
 			}
 			else if (move.moveType == MoveType::enPassant)
 			{
@@ -465,6 +466,7 @@ namespace Eval
 				board.egVal_ -= egTable_[move.promotion][move.endPos];
 				board.mgVal_ += mgTable_[move.moved][move.endPos];
 				board.egVal_ += egTable_[move.moved][move.endPos];
+				board.gamePhase_ += gamePhaseValue_[move.promotion % 6] - gamePhaseValue_[move.moved % 6];
 			}
 		}
 	}

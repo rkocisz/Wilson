@@ -1,7 +1,8 @@
+#ifdef _WIN32
 #include <windows.h>
-#include <bitset>
+#endif
+
 #include <vector>
-#include <algorithm>
 
 #include "tests.h"
 #include "board.h"
@@ -129,7 +130,9 @@ void UCI()
 
 int main()
 {
-    SetConsoleOutputCP(CP_UTF8);
+    #ifdef _WIN32
+        SetConsoleOutputCP(CP_UTF8);
+    #endif
 
     MoveGenUtil::init();
     Eval::init();
