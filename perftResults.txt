@@ -11,6 +11,10 @@ nodes per second: 20238919
 after move generation in diffrent file:
 perft took: 6.09827 seconds
 nodes per second: 20355375
+
+with fixed castling rights:
+perft took: 7.41667 seconds
+nodes per second: 16736961
 -----------------------------------------
 
 SEARCH PERFT

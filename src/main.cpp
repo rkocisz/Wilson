@@ -100,7 +100,7 @@ void UCI()
 
         if (command == "uci") 
         {
-            std::cout << "id name Wilson v1" << std::endl;
+            std::cout << "id name Wilson v1.2" << std::endl;
             std::cout << "id author rkocisz" << std::endl;
             std::cout << "uciok" << std::endl;
         }
@@ -145,9 +145,9 @@ int main()
     //searchPerft();
     //testIncrementalEval();
 
-    playAsWhite();
+    //playAsWhite();
 
-    //UCI();
+    UCI();
 
     return 0;
 }

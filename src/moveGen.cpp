@@ -513,8 +513,15 @@ namespace MoveGen
 		Color moving = board_->sideToMove_;
 		uint64_t kingMask = 0ULL;
 
+		bool isInCheckVar = isInCheck(board);
+
 		for (const Move& move : pseudoLegalMoves_)
 		{
+			if (move.moveType == MoveType::longCastle || move.moveType == MoveType::shortCastle && isInCheckVar)
+			{
+				break;
+			}
+
 			board_->makeMove(move);
 
 			if (moving == Color::white)

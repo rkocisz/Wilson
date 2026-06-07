@@ -24,12 +24,12 @@ int negamax(Board& board, int depth, int alpha, int beta)
     if (depth == 0)
     {
 		int eval1 = Eval::calculateUpdatedEval(board);
-		int eval2 = Eval::evaluate(board);
+		//int eval2 = Eval::evaluate(board);
 
-		if (eval1 != eval2)
+		/*if (eval1 != eval2)
 		{
 			std::cout << "NIE zgadza sie eval!!!!!!!!!!!!!!!!!!! incremental: " << eval1 << "static: " << eval2;
-		}
+		}*/
 
         return eval1;
     }

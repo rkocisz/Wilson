@@ -408,13 +408,16 @@ namespace Eval
 			{
 				board.mgVal_ += mgTable_[move.captured][move.endPos];
 				board.egVal_ += egTable_[move.captured][move.endPos];
-				board.gamePhase_ += gamePhaseValue_[move.captured % 6];
+				board.gamePhase_ -= gamePhaseValue_[move.captured % 6];
 			}
 			else if (move.moveType == MoveType::enPassant)
 			{
-				board.mgVal_ += mgTable_[move.captured][move.endPos + 8];
-				board.egVal_ += egTable_[move.captured][move.endPos + 8];
-				board.gamePhase_ += gamePhaseValue_[move.captured % 6];
+				PieceType capturedPawn = PieceType::blackPawn;
+				int capturedPos = move.endPos + 8;
+
+				board.mgVal_ += mgTable_[capturedPawn][capturedPos];
+				board.egVal_ += egTable_[capturedPawn][capturedPos];
+				board.gamePhase_ -= gamePhaseValue_[capturedPawn % 6];
 			}
 
 			if (move.promotion != PieceType::empty)
@@ -455,9 +458,12 @@ namespace Eval
 			}
 			else if (move.moveType == MoveType::enPassant)
 			{
-				board.mgVal_ -= mgTable_[move.captured][move.endPos - 8];
-				board.egVal_ -= egTable_[move.captured][move.endPos - 8];
-				board.gamePhase_ -= gamePhaseValue_[move.captured % 6];
+				PieceType capturedPawn = PieceType::whitePawn;
+				int capturedPos = move.endPos - 8;
+
+				board.mgVal_ -= mgTable_[capturedPawn][capturedPos];
+				board.egVal_ -= egTable_[capturedPawn][capturedPos];
+				board.gamePhase_ -= gamePhaseValue_[capturedPawn % 6];
 			}
 			
 			if (move.promotion != PieceType::empty)
