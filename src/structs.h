@@ -63,26 +63,36 @@ struct MagicInfo
 	bool operator==(const MagicInfo&) const = default;
 };
 
+enum class TTFlag
+{
+	exact,
+	lowerBound,
+	upperBound
+};
+
 struct TTEntry
 {
 	Move bestMove;
 	int depth;
 	int eval;
 	uint64_t zobristKey;
+	TTFlag flag;
 
-	TTEntry(Move bestMove, int depth, int eval, uint64_t zobristKey)
+	TTEntry(Move bestMove, int depth, int eval, uint64_t zobristKey, TTFlag flag)
 	:bestMove(bestMove)
-	,depth(depth)
-	,eval(eval)
-	,zobristKey(zobristKey)
+	, depth(depth)
+	, eval(eval)
+	, zobristKey(zobristKey)
+	, flag(flag)
 	{
 	}
 
 	TTEntry()
 	:bestMove(Move())
-	,depth(-1)
-	,eval(-1)
-	,zobristKey(0)
+	, depth(-1)
+	, eval(-1)
+	, zobristKey(0)
+	, flag(TTFlag::exact)
 	{
 	}
 };
